@@ -1,0 +1,29 @@
+﻿<Window x:Class="OsuReplayv0.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:OsuReplayv0"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Button Name="btnOsu" Content=".osu" Width="100" Height="40"
+                Click="btnOsu_Click"/>
+        <Button Grid.Column="1" Name="btnOsr" Content=".osr" Width="100" Height="40"
+                Click="btnOsr_Click"/>
+        <TextBlock Grid.Row="1" Name="tbInfoOsu" FontSize="12"
+                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                   TextAlignment="Center"/>
+        <TextBlock Grid.Row="1" Grid.Column="1" Name="tbInfoOsr" FontSize="12"
+                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                   TextAlignment="Center"/>
+    </Grid>
+</Window>
