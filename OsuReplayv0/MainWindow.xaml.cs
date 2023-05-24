@@ -189,6 +189,58 @@ namespace OsuReplayv0
                 Debug.WriteLine("# of Gekis: " + replayReader.ReadUInt16());
                 Debug.WriteLine("# of Katus: " + replayReader.ReadUInt16());
                 Debug.WriteLine("# of Misses: " + replayReader.ReadUInt16());
+                Debug.WriteLine("Total Score: " + replayReader.ReadInt32());
+                Debug.WriteLine("Highest Combo: " + replayReader.ReadUInt16());
+                Debug.WriteLine("Full Combo: " + (replayReader.ReadByte() == 0b_1 ? "Yes" : "No")); // TODO: double check ==
+                Debug.WriteLine("Mods : " + replayReader.ReadInt32());
+
+                if (replayReader.ReadByte() != 0x0b)
+                {
+                    Debug.WriteLine("Life bar: (null)");
+                }
+                else
+                {
+                    int result = 0;
+                    int shift = 0;
+                    while (true)
+                    {
+                        byte b = replayReader.ReadByte();
+
+                        Debug.WriteLine(b);
+                        bool msb = b < 0b_1000_0000;
+                        b &= 0b_0111_1111;
+
+                        result |= b;
+                        result <<= shift;
+
+                        if (msb)
+                        {
+                            break;
+                        }
+                        shift += 7;
+                    }
+                    Debug.WriteLine("result: " + result);
+                    char[] chars = replayReader.ReadChars(result);
+                    string str = string.Join("", chars);
+
+                    Debug.WriteLine("Life bar: " + str);
+                }
+
+                Debug.WriteLine("Time stamp: " + replayReader.ReadUInt64());
+                int bytesToRead = replayReader.ReadInt32();
+                Debug.WriteLine("Length of compressed replay data: " + bytesToRead);
+                // TODO: store byte array
+                replayReader.ReadBytes(bytesToRead);
+                Debug.WriteLine("Online Score ID: " + replayReader.ReadUInt32());
+                try
+                {
+                    Debug.WriteLine("Additional Mod Info: " + replayReader.ReadDouble());
+                }
+                catch (Exception ex) when (ex is IOException || ex is EndOfStreamException) 
+                {
+                    Debug.WriteLine("Additional Mod Info: (null)");
+                    throw;
+                }
             }
             else
             {
