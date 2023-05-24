@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -17,6 +18,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using OsuParsers.Replays;
 
 namespace OsuReplayv0
 {
@@ -103,8 +105,7 @@ namespace OsuReplayv0
                         bool msb = b < 0b_1000_0000;
                         b &= 0b_0111_1111;
 
-                        result |= b;
-                        result <<= shift;
+                        result |= b << shift;
 
                         if (msb)
                         {
@@ -135,8 +136,7 @@ namespace OsuReplayv0
                         bool msb = b < 0b_1000_0000;
                         b &= 0b_0111_1111;
 
-                        result |= b;
-                        result <<= shift;
+                        result |= b << shift;
 
                         if (msb)
                         {
@@ -168,8 +168,7 @@ namespace OsuReplayv0
                         bool msb = b < 0b_1000_0000;
                         b &= 0b_0111_1111;
 
-                        result |= b;
-                        result <<= shift;
+                        result |= b << shift;
 
                         if (msb)
                         {
@@ -210,8 +209,7 @@ namespace OsuReplayv0
                         bool msb = b < 0b_1000_0000;
                         b &= 0b_0111_1111;
 
-                        result |= b;
-                        result <<= shift;
+                        result |= b << shift;
 
                         if (msb)
                         {
@@ -226,12 +224,32 @@ namespace OsuReplayv0
                     Debug.WriteLine("Life bar: " + str);
                 }
 
-                Debug.WriteLine("Time stamp: " + replayReader.ReadUInt64());
+                long timeStamp = replayReader.ReadInt64();
+                Debug.WriteLine("Time stamp: " + timeStamp);
+
+                DateTime centuryBegin = new DateTime(2001, 1, 1);
+                DateTime currentDate = DateTime.Now;
+
+                long elapsedTicks = timeStamp - centuryBegin.Ticks;
+                TimeSpan elapsedSpan = new TimeSpan(elapsedTicks);
+
+                DateTime finalDate = centuryBegin + elapsedSpan;
+
+                TimeZoneInfo localTimeZone = TimeZoneInfo.Local;
+                finalDate = TimeZoneInfo.ConvertTimeFromUtc(finalDate, localTimeZone);
+
+                string formattedDate = finalDate.ToString("g");
+
+                Debug.WriteLine("Formatted date: " + formattedDate);
+
                 int bytesToRead = replayReader.ReadInt32();
                 Debug.WriteLine("Length of compressed replay data: " + bytesToRead);
+
                 // TODO: store byte array
-                replayReader.ReadBytes(bytesToRead);
-                Debug.WriteLine("Online Score ID: " + replayReader.ReadUInt32());
+                byte[] byteArr;
+                byteArr = replayReader.ReadBytes(bytesToRead);
+
+                Debug.WriteLine("Online Score ID: " + replayReader.ReadUInt64());
                 try
                 {
                     Debug.WriteLine("Additional Mod Info: " + replayReader.ReadDouble());
@@ -239,7 +257,7 @@ namespace OsuReplayv0
                 catch (Exception ex) when (ex is IOException || ex is EndOfStreamException) 
                 {
                     Debug.WriteLine("Additional Mod Info: (null)");
-                    throw;
+                    //throw;
                 }
             }
             else
