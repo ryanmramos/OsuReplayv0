@@ -153,7 +153,7 @@ namespace OsuReplayv0
             }
         }
 
-        private void btnOsr_Click(object sender, RoutedEventArgs e)
+        private async void btnOsr_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
             fileDialog.Filter = ".osr files| *.osr";
@@ -190,10 +190,55 @@ namespace OsuReplayv0
             time = 0;
             Debug.WriteLine(replayFrames.Length);
 
-            timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromMilliseconds(1);
-            timer.Tick += Timer_Tick;
-            timer.Start();
+            //timer = new DispatcherTimer();
+            //timer.Interval = TimeSpan.FromMilliseconds(1);
+            //timer.Tick += Timer_Tick;
+            //timer.Start();
+
+            ReplayFrame currentFrame = replayFrames[0];
+            Canvas.SetLeft(circle, currentFrame.X);
+            Canvas.SetTop(circle, currentFrame.Y);
+            if (canvas.Children.Count == 0)
+            {
+                canvas.Children.Add(circle);
+            }
+
+            for (int i = 1; i < replayFrames.Length; i++)
+            {
+                tbTime.Text = replayFrames[i - 1].Time.ToString();
+
+                currentFrame = replayFrames[i];
+
+                if (currentFrame.TimeDiff < 0)
+                {
+                    await Task.Delay(-1 * currentFrame.TimeDiff);
+                }
+                else
+                {
+                    await Task.Delay(currentFrame.TimeDiff);
+                }
+
+                Canvas.SetLeft(circle, currentFrame.X);
+                Canvas.SetTop(circle, currentFrame.Y);
+
+                // check for combination of button presses
+                if (currentFrame.StandardKeys == StandardKeys.K1)
+                {
+                    recK1.Fill = Brushes.Gray;
+                }
+                else
+                {
+                    recK1.Fill = Brushes.White;
+                }
+                if (currentFrame.StandardKeys == StandardKeys.K2)
+                {
+                    recK2.Fill = Brushes.Gray;
+                }
+                else
+                {
+                    recK2.Fill = Brushes.White;
+                }
+            }
         }
     }
 }
