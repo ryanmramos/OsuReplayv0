@@ -5,25 +5,43 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:OsuReplayv0"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height ="454" Width="512">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition/>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="384"/>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
-        <Button Name="btnOsu" Content=".osu" Width="100" Height="40"
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width=".4*"/>
+                <ColumnDefinition Width=".4*"/>
+                <ColumnDefinition Width=".2*"/>
+            </Grid.ColumnDefinitions>
+            <Button Name="btnOsu" Content=".osu" Width="100" Height="40"
                 Click="btnOsu_Click"/>
-        <Button Grid.Column="1" Name="btnOsr" Content=".osr" Width="100" Height="40"
+            <Button Grid.Column="1" Name="btnOsr" Content=".osr" Width="100" Height="40"
                 Click="btnOsr_Click"/>
-        <TextBlock Grid.Row="1" Name="tbInfoOsu" FontSize="12"
-                   VerticalAlignment="Center" HorizontalAlignment="Center"
-                   TextAlignment="Center"/>
-        <TextBlock Grid.Row="1" Grid.Column="1" Name="tbInfoOsr" FontSize="12"
-                   VerticalAlignment="Center" HorizontalAlignment="Center"
-                   TextAlignment="Center"/>
+
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock Name="tbTime" Text="{Binding Time}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions >
+                        <ColumnDefinition />
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Rectangle Name="recK1" Fill="White"/>
+                    <Rectangle Grid.Column="1" Name="recK2" Fill="White"/>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <Canvas x:Name="canvas" Width="512" Height="384" Grid.Row="1" Background="LightGray"/>
+
     </Grid>
 </Window>
