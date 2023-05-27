@@ -1,35 +1,27 @@
 ﻿using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Security.RightsManagement;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 using OsuParsers.Replays;
 using OsuParsers.Decoders;
 using OsuParsers.Replays.Objects;
 using OsuParsers.Enums.Replays;
 using System.Windows.Threading;
+using System.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace OsuReplayv0
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
 
         private Ellipse circle = new Ellipse
@@ -40,22 +32,78 @@ namespace OsuReplayv0
             Stroke = Brushes.Black,
             StrokeThickness = 1
         };
-        private DispatcherTimer timer = new DispatcherTimer();
+        private readonly DispatcherTimer timer = new DispatcherTimer();
         private ReplayFrame[] replayFrames = new ReplayFrame[] { };
         private int currentIndex = 0;
         private DateTime startTime = new();
 
-        private float time = 0;
+        private int time = 0;
 
-        public float Time
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public int Time
         {
             get { return time; }
-            set { time = value; }
+            set
+            {
+                time = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Time)));
+            }
         }
+
+        private double cursorLeft;
+
+        public double CursorLeft
+        {
+            get { return cursorLeft; }
+            set 
+            { 
+                cursorLeft = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CursorLeft)));
+            }
+        }
+
+        private double cursorTop;
+
+        public double CursorTop
+        {
+            get { return cursorTop; }
+            set 
+            { 
+                cursorTop = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CursorTop)));
+            }
+        }
+
+        private SolidColorBrush rec1Fill = Brushes.White;
+
+        public SolidColorBrush Rec1Fill
+        {
+            get { return rec1Fill; }
+            set
+            {
+                rec1Fill = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Rec1Fill)));
+            }
+        }
+
+        private SolidColorBrush rec2Fill = Brushes.White;
+
+        public SolidColorBrush Rec2Fill
+        {
+            get { return rec2Fill; }
+            set
+            {
+                rec2Fill = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Rec2Fill)));
+            }
+        }
+
 
         public MainWindow()
         {
             DataContext = this;
+            OsrClickCommand = new RelayCommand(OnOsrClick);
             InitializeComponent();
         }
 
@@ -153,7 +201,9 @@ namespace OsuReplayv0
             }
         }
 
-        private async void btnOsr_Click(object sender, RoutedEventArgs e)
+        public ICommand OsrClickCommand { get; }
+
+        private async void OnOsrClick()
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
             fileDialog.Filter = ".osr files| *.osr";
@@ -170,42 +220,22 @@ namespace OsuReplayv0
 
                 Debug.WriteLine(replay.PlayerName);
 
-                replayFrames = replay.ReplayFrames.ToArray(); ;
-
-                //foreach (ReplayFrame rf in replay.ReplayFrames)
-                //{
-                //    float second = rf.Time / 1000.0f;
-                //    float xPos = rf.X;
-                //    float yPos = rf.Y;
-                //    StandardKeys keys = rf.StandardKeys;
-
-                //    Debug.WriteLine($"At {second}s: Position = ({xPos},{yPos}) : Keys = {keys}");
-                //}
+                replayFrames = replay.ReplayFrames.ToArray();
             }
             else
             {
                 // didnt pick anything
+                return;
             }
-
-            time = 0;
             Debug.WriteLine(replayFrames.Length);
 
-            //timer = new DispatcherTimer();
-            //timer.Interval = TimeSpan.FromMilliseconds(1);
-            //timer.Tick += Timer_Tick;
-            //timer.Start();
-
             ReplayFrame currentFrame = replayFrames[0];
-            Canvas.SetLeft(circle, currentFrame.X);
-            Canvas.SetTop(circle, currentFrame.Y);
-            if (canvas.Children.Count == 0)
-            {
-                canvas.Children.Add(circle);
-            }
+            CursorLeft = currentFrame.X;
+            CursorTop = currentFrame.Y;
 
             for (int i = 1; i < replayFrames.Length; i++)
             {
-                tbTime.Text = replayFrames[i - 1].Time.ToString();
+                Time = replayFrames[i - 1].Time;
 
                 currentFrame = replayFrames[i];
 
@@ -215,28 +245,27 @@ namespace OsuReplayv0
                 }
                 else
                 {
-                    await Task.Delay(currentFrame.TimeDiff);
+                    await Task.Delay(1 * currentFrame.TimeDiff);
                 }
-
-                Canvas.SetLeft(circle, currentFrame.X);
-                Canvas.SetTop(circle, currentFrame.Y);
-
-                // check for combination of button presses
+                CursorLeft = currentFrame.X;
+                CursorTop = currentFrame.Y;
+                
+                // TODO: check for combination of button presses
                 if (currentFrame.StandardKeys == StandardKeys.K1)
                 {
-                    recK1.Fill = Brushes.Gray;
+                    Rec1Fill = Brushes.Gray;
                 }
                 else
-                {
-                    recK1.Fill = Brushes.White;
+                {   
+                    Rec1Fill = Brushes.White;   
                 }
                 if (currentFrame.StandardKeys == StandardKeys.K2)
                 {
-                    recK2.Fill = Brushes.Gray;
+                    Rec2Fill = Brushes.Gray;
                 }
                 else
                 {
-                    recK2.Fill = Brushes.White;
+                    Rec2Fill = Brushes.White;
                 }
             }
         }

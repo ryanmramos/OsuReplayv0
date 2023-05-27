@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:OsuReplayv0"
         mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=local:MainWindow}"
         Title="MainWindow" Height ="500" Width="540">
     <Grid>
         <Grid.RowDefinitions>
@@ -21,7 +22,7 @@
             <Button Name="btnOsu" Content=".osu" Width="100" Height="40"
                 Click="btnOsu_Click"/>
             <Button Grid.Column="1" Name="btnOsr" Content=".osr" Width="100" Height="40"
-                Click="btnOsr_Click"/>
+                Command="{Binding OsrClickCommand}"/>
 
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
@@ -35,13 +36,16 @@
                         <ColumnDefinition />
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    <Rectangle Name="recK1" Fill="White"/>
-                    <Rectangle Grid.Column="1" Name="recK2" Fill="White"/>
+                    <Rectangle Name="recK1" Fill="{Binding Rec1Fill}"/>
+                    <Rectangle Grid.Column="1" Name="recK2" Fill="{Binding Rec2Fill}"/>
                 </Grid>
             </Grid>
         </Grid>
 
-        <Canvas x:Name="canvas" Width="512" Height="384" Grid.Row="1" Background="LightGray"/>
+        <Canvas x:Name="canvas" Width="512" Height="384" Grid.Row="1" Background="LightGray">
+            <Ellipse Width="10" Height="10" Fill="Red" Stroke="Black" StrokeThickness="1"
+                     Canvas.Left="{Binding CursorLeft}" Canvas.Top="{Binding CursorTop}"/>
+        </Canvas>
 
     </Grid>
 </Window>
