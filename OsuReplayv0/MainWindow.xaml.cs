@@ -24,18 +24,9 @@ namespace OsuReplayv0
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
 
-        private Ellipse circle = new Ellipse
-        {
-            Width = 10,
-            Height = 10,
-            Fill = Brushes.Red,
-            Stroke = Brushes.Black,
-            StrokeThickness = 1
-        };
         private readonly DispatcherTimer timer = new DispatcherTimer();
         private ReplayFrame[] replayFrames = new ReplayFrame[] { };
         private int currentIndex = 0;
-        private DateTime startTime = new();
 
         private int time = 0;
 
@@ -104,69 +95,15 @@ namespace OsuReplayv0
         {
             DataContext = this;
             OsrClickCommand = new RelayCommand(OnOsrClick);
+            OsuClickCommand = new RelayCommand(OnOsuClick);
             InitializeComponent();
         }
 
-        private void Timer_Tick(object sender, EventArgs e)
-        {
+        public ICommand OsrClickCommand { get; }
 
-            time += 1;
-            tbTime.Text = time.ToString();
-            //Debug.WriteLine($"Time in ms: {time}");
+        public ICommand OsuClickCommand { get; }
 
-            if (currentIndex >= replayFrames.Length)
-            {
-                timer.Stop();
-                return;
-            }
-
-            ReplayFrame currentFrame = replayFrames[currentIndex];
-
-            if (currentIndex == 0)
-            {
-                Canvas.SetLeft(circle, currentFrame.X);
-                Canvas.SetTop(circle, currentFrame.Y);
-                canvas.Children.Add(circle);
-                currentIndex++;
-            }
-            else
-            {
-                double duration = Math.Abs(currentFrame.Time - replayFrames[currentIndex - 1].Time); // Duration between frames
-                double elapsed = (DateTime.Now - timer.Interval - startTime).TotalMilliseconds; // Elapsed time since last frame
-
-                if (elapsed >= duration)
-                {
-                    Canvas.SetLeft(circle, currentFrame.X);
-                    Canvas.SetTop(circle, currentFrame.Y);
-                    currentIndex++;
-                    startTime = DateTime.Now;
-                }
-                else
-                {
-                    // do nothing for now
-                }
-            }
-
-            // check for combination of button presses
-            if (currentFrame.StandardKeys == StandardKeys.K1)
-            {
-                recK1.Fill = Brushes.Gray;
-            }
-            else
-            {
-                recK1.Fill = Brushes.White;
-            }
-            if (currentFrame.StandardKeys == StandardKeys.K2)
-            {
-                recK2.Fill = Brushes.Gray;
-            }
-            else
-            {
-                recK2.Fill = Brushes.White;
-            }
-        }
-
-        private void btnOsu_Click(object sender, RoutedEventArgs e)
+        private void OnOsuClick()
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
             fileDialog.Filter = ".osu files | *.osu";
@@ -200,8 +137,6 @@ namespace OsuReplayv0
                 // didnt pick anything
             }
         }
-
-        public ICommand OsrClickCommand { get; }
 
         private async void OnOsrClick()
         {
