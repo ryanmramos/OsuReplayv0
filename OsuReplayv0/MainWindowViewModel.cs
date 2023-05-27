@@ -8,15 +8,12 @@ using OsuParsers.Enums.Replays;
 using OsuParsers.Replays;
 using OsuParsers.Replays.Objects;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Input;
-using System.Runtime.CompilerServices;
+using System.Windows;
 
 namespace OsuReplayv0
 {
@@ -74,13 +71,11 @@ namespace OsuReplayv0
 
 
                 // AUDIO
-                // TODO: need to increase scope of mediaplayer later
-                //MediaPlayer player = new MediaPlayer();
-                //player.Open(new Uri(path.Substring(0, path.LastIndexOf('\\')) + "\\" + beatmap.GeneralSection.AudioFilename));
-                //player.Play();
-
-                //// temporary to keep music playing
-                //await Task.Delay(100000);
+                // TODO: need to increase scope of mediaplayer later (problem of one or more songs at same time)
+                MediaPlayer player = new MediaPlayer();
+                player.Open(new Uri(path.Substring(0, path.LastIndexOf('\\')) + "\\" + beatmap.GeneralSection.AudioFilename));
+                player.Play();
+                Application.Current.Dispatcher.Invoke(() => player.Play());
 
                 HitObject[] hitObjects = beatmap.HitObjects.ToArray();
                 foreach (HitObject hitObject in hitObjects)
@@ -121,12 +116,12 @@ namespace OsuReplayv0
             Debug.WriteLine(replayFrames.Length);
 
             ReplayFrame currentFrame = replayFrames[0];
-            CursorLeft = currentFrame.X;
-            CursorTop = currentFrame.Y;
 
             for (int i = 1; i < replayFrames.Length; i++)
             {
-                Time = replayFrames[i - 1].Time;
+                ReplayFrame prevFrame = replayFrames[i - 1];
+                Time = prevFrame.Time;
+                Draw(prevFrame.X, prevFrame.Y, prevFrame.StandardKeys);
 
                 currentFrame = replayFrames[i];
 
@@ -136,28 +131,32 @@ namespace OsuReplayv0
                 }
                 else
                 {
-                    await Task.Delay(1 * currentFrame.TimeDiff);
+                    //await Task.Delay(1 * currentFrame.TimeDiff);
+                    await Task.Delay((int)(1 * currentFrame.TimeDiff));
                 }
-                CursorLeft = currentFrame.X;
-                CursorTop = currentFrame.Y;
+            }
+        }
 
-                // TODO: check for combination of button presses
-                if (currentFrame.StandardKeys == StandardKeys.K1)
-                {
-                    Rec1Fill = Brushes.Gray;
-                }
-                else
-                {
-                    Rec1Fill = Brushes.White;
-                }
-                if (currentFrame.StandardKeys == StandardKeys.K2)
-                {
-                    Rec2Fill = Brushes.Gray;
-                }
-                else
-                {
-                    Rec2Fill = Brushes.White;
-                }
+        private void Draw(double x, double y, StandardKeys sKeys)
+        {
+            CursorLeft = x; CursorTop = y;
+
+            // TODO: check for combination of button presses
+            if (sKeys == StandardKeys.K1)
+            {
+                Rec1Fill = Brushes.Gray;
+            }
+            else
+            {
+                Rec1Fill = Brushes.White;
+            }
+            if (sKeys == StandardKeys.K2)
+            {
+                Rec2Fill = Brushes.Gray;
+            }
+            else
+            {
+                Rec2Fill = Brushes.White;
             }
         }
     }

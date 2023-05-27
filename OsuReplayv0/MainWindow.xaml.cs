@@ -1,19 +1,4 @@
-﻿using Microsoft.Win32;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Input;
-using System.Windows.Media;
-using OsuParsers.Replays;
-using OsuParsers.Decoders;
-using OsuParsers.Replays.Objects;
-using OsuParsers.Enums.Replays;
-using System.Windows.Threading;
-using System.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using OsuParsers.Beatmaps;
-using System;
-using OsuParsers.Beatmaps.Objects;
+﻿using System.Windows;
 
 namespace OsuReplayv0
 {
