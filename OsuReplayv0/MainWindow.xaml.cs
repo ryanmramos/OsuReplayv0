@@ -1,13 +1,9 @@
 ﻿using Microsoft.Win32;
-using System;
 using System.Diagnostics;
-using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Shapes;
 using OsuParsers.Replays;
 using OsuParsers.Decoders;
 using OsuParsers.Replays.Objects;
@@ -15,6 +11,8 @@ using OsuParsers.Enums.Replays;
 using System.Windows.Threading;
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using OsuParsers.Beatmaps;
+using System;
 
 namespace OsuReplayv0
 {
@@ -90,6 +88,19 @@ namespace OsuReplayv0
             }
         }
 
+        private string srcImage;
+
+        public string SrcImage
+        {
+            get { return srcImage; }
+            set 
+            { 
+                srcImage = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SrcImage)));
+            }
+        }
+
+
 
         public MainWindow()
         {
@@ -103,7 +114,7 @@ namespace OsuReplayv0
 
         public ICommand OsuClickCommand { get; }
 
-        private void OnOsuClick()
+        private async void OnOsuClick()
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
             fileDialog.Filter = ".osu files | *.osu";
@@ -114,23 +125,22 @@ namespace OsuReplayv0
                 string path = fileDialog.FileName;
                 string fileName = fileDialog.SafeFileName;
 
+                Beatmap beatmap = BeatmapDecoder.Decode(path);
+
                 Debug.WriteLine($"Path: {path}\nFile name: {fileName}");
 
-                string[] lines;
+                // IMAGE
+                SrcImage = path.Substring(0, path.LastIndexOf('\\')) + "\\" + beatmap.EventsSection.BackgroundImage;
 
-                try
-                {
-                    lines = File.ReadAllLines(path);
-                }
-                catch (IOException)
-                {
-                    throw;
-                }
 
-                foreach (string line in lines)
-                {
-                    Debug.WriteLine(line);
-                }
+                // AUDIO
+                // TODO: need to increase scope of mediaplayer later
+                MediaPlayer player = new MediaPlayer();
+                player.Open(new Uri(path.Substring(0, path.LastIndexOf('\\')) + "\\" + beatmap.GeneralSection.AudioFilename));
+                player.Play();
+
+                // temporary to keep music playing
+                await Task.Delay(100000);
             }
             else
             {

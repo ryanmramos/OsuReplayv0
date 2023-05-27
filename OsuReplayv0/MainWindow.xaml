@@ -42,10 +42,14 @@
             </Grid>
         </Grid>
 
-        <Canvas x:Name="canvas" Width="512" Height="384" Grid.Row="1" Background="LightGray">
-            <Ellipse Width="10" Height="10" Fill="Red" Stroke="Black" StrokeThickness="1"
+        <Grid Grid.Row="1">
+            <Image Width="512" Height="384" Source="{Binding SrcImage}" Stretch="Fill"/>
+            <Rectangle Fill="#C0000000" Width="512" Height="384"/>
+            <Canvas x:Name="canvas" Width="512" Height="384" Grid.Row="1" Background="Transparent">
+                <Ellipse Width="10" Height="10" Fill="Red" Stroke="Black" StrokeThickness="1"
                      Canvas.Left="{Binding CursorLeft}" Canvas.Top="{Binding CursorTop}"/>
-        </Canvas>
+            </Canvas>
+        </Grid>
 
     </Grid>
 </Window>
