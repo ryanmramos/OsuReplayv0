@@ -14,11 +14,14 @@ using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Windows;
+using System.Collections.ObjectModel;
+using System.Threading;
 
 namespace OsuReplayv0
 {
     public partial class MainWindowViewModel : ObservableObject
     {
+
         private ReplayFrame[] replayFrames = new ReplayFrame[] { };
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -40,6 +43,8 @@ namespace OsuReplayv0
 
         [ObservableProperty]
         private string srcImage;
+
+        public ObservableCollection<Circle> Circles { get; } = new ObservableCollection<Circle>();
 
         public MainWindowViewModel()
         {
@@ -78,15 +83,34 @@ namespace OsuReplayv0
                 Application.Current.Dispatcher.Invoke(() => player.Play());
 
                 HitObject[] hitObjects = beatmap.HitObjects.ToArray();
-                foreach (HitObject hitObject in hitObjects)
+                for (int i = 1; i < hitObjects.Length; i++)
                 {
-                    Debug.WriteLine(hitObject.StartTime);
+                    HitObject prevHitObject = hitObjects[i - 1];
+                    HitObject currHitObject = hitObjects[i];
+
+                    DrawHitObject(prevHitObject);
+
+                    await Task.Delay(currHitObject.StartTime -  prevHitObject.StartTime);
+
                 }
             }
             else
             {
                 // didnt pick anything
             }
+        }
+
+        private async void DrawHitObject(HitObject hitObject)
+        {
+            if (hitObject.GetType() != typeof(HitCircle))
+            {
+                return;
+            }
+            Circle circle = new Circle { X = hitObject.Position.X, Y = hitObject.Position.Y, Radius = 30, Fill = Brushes.Aqua };
+            var uiContext = SynchronizationContext.Current;
+            Circles.Add(circle);
+            await Task.Delay(1000);
+            Circles.Remove(circle);
         }
 
         private async void OnOsrClick()

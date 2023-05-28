@@ -48,6 +48,17 @@
             <Canvas x:Name="canvas" Width="512" Height="384" Grid.Row="1" Background="Transparent">
                 <Ellipse Width="10" Height="10" Fill="Red" Stroke="Black" StrokeThickness="1"
                      Canvas.Left="{Binding CursorLeft}" Canvas.Top="{Binding CursorTop}"/>
+                <ItemsControl ItemsSource="{Binding Circles}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Ellipse Width="{Binding Radius}" Height="{Binding Radius}" Fill="Aqua" Opacity=".5">
+                                <Ellipse.RenderTransform>
+                                    <TranslateTransform X="{Binding X}" Y="{Binding Y}"/>
+                                </Ellipse.RenderTransform>
+                            </Ellipse>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </Canvas>
         </Grid>
 
