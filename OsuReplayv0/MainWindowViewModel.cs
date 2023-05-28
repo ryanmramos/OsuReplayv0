@@ -16,6 +16,7 @@ using System.Windows.Input;
 using System.Windows;
 using System.Collections.ObjectModel;
 using System.Threading;
+using System.Collections.Generic;
 
 namespace OsuReplayv0
 {
@@ -23,6 +24,9 @@ namespace OsuReplayv0
     {
 
         private ReplayFrame[] replayFrames = new ReplayFrame[] { };
+        private OsuFrame[] osuFrames = new OsuFrame[] { };
+
+        private Beatmap beatmap;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -56,9 +60,10 @@ namespace OsuReplayv0
 
         public ICommand OsuClickCommand { get; }
 
-        private async void OnOsuClick()
+        private void OnOsuClick()
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
+            fileDialog.InitialDirectory = "C:\\Users\\ryanr\\AppData\\Local\\osu!\\Songs";
             fileDialog.Filter = ".osu files | *.osu";
 
             bool? success = fileDialog.ShowDialog();
@@ -67,10 +72,11 @@ namespace OsuReplayv0
                 string path = fileDialog.FileName;
                 string fileName = fileDialog.SafeFileName;
 
-                Beatmap beatmap = BeatmapDecoder.Decode(path);
+                beatmap = BeatmapDecoder.Decode(path);
 
                 Debug.WriteLine($"Path: {path}\nFile name: {fileName}");
 
+                /*
                 // IMAGE
                 SrcImage = path.Substring(0, path.LastIndexOf('\\')) + "\\" + beatmap.EventsSection.BackgroundImage;
 
@@ -93,6 +99,7 @@ namespace OsuReplayv0
                     await Task.Delay(currHitObject.StartTime -  prevHitObject.StartTime);
 
                 }
+                */
             }
             else
             {
@@ -113,8 +120,9 @@ namespace OsuReplayv0
             Circles.Remove(circle);
         }
 
-        private async void OnOsrClick()
+        private void OnOsrClick()
         {
+            /*
             OpenFileDialog fileDialog = new OpenFileDialog();
             fileDialog.Filter = ".osr files| *.osr";
 
@@ -158,6 +166,121 @@ namespace OsuReplayv0
                     //await Task.Delay(1 * currentFrame.TimeDiff);
                     await Task.Delay((int)(1 * currentFrame.TimeDiff));
                 }
+            }
+            */
+
+            // TODO: make to automatically disabled later (CanExecute)
+            if  (beatmap == null)
+            {
+                Debug.WriteLine("Select corresponding beatmap first");
+                return;
+            }
+
+            if (beatmap.GeneralSection.ModeId != 0)
+            {
+                Debug.WriteLine("Beatmap must be in osu!standard");
+                return;
+            }
+
+            OpenFileDialog fileDialog = new OpenFileDialog();
+            fileDialog.InitialDirectory = "C:\\Users\\ryanr\\AppData\\Local\\osu!\\Replays";
+            fileDialog.Filter = ".osr files| *.osr";
+
+            bool? success = fileDialog.ShowDialog();
+            if (success == true)
+            {
+                string path = fileDialog.FileName;
+                string fileName = fileDialog.SafeFileName;
+
+                Debug.WriteLine($"Path: {path}\nFile name: {fileName}");
+
+                Replay replay = ReplayDecoder.Decode(path);
+
+                replayFrames = replay.ReplayFrames.ToArray();
+                osuFrames = new OsuFrame[replayFrames.Length];
+
+                HitObject[] hitObjects = beatmap.HitObjects.ToArray();
+                LifeFrame[] lifeFrames = replay.LifeFrames.ToArray();
+                float AR = beatmap.DifficultySection.ApproachRate;
+
+                int preempt = calculatePreempt(AR);
+
+                int lifeFrameIdx = 0;
+                int windowStartIdx = 0;
+
+                bool beforeFirstHitObject = true;
+
+                int i = 0;
+                foreach ( ReplayFrame frame in replayFrames )
+                {
+                    if (beforeFirstHitObject)
+                    {
+                        if (frame.Time >= hitObjects[0].StartTime)
+                            beforeFirstHitObject = false;
+                    }
+
+                    List<HitObject> objects = new List<HitObject>();
+                    int windowStart = frame.Time - preempt;
+                    int windowEnd = frame.Time + (200 - (int) (10 * beatmap.DifficultySection.OverallDifficulty)); // TODO: technically window end is when this object is clicked (which may be slightly after), if it ever is. Come back and fix
+                    while ( windowStartIdx < hitObjects.Length && windowStart > hitObjects[windowStartIdx].StartTime) 
+                    {
+                        windowStartIdx++;
+                    }
+                    int localIdx = windowStartIdx;
+                    while ( localIdx < hitObjects.Length && hitObjects[localIdx].StartTime < windowEnd)
+                    {
+                        objects.Add(hitObjects[localIdx]);
+                        localIdx++;
+                    }
+
+                    LifeFrame lifeFrame = new LifeFrame();
+                    while (lifeFrameIdx + 1 < lifeFrames.Length && frame.Time >= lifeFrames[lifeFrameIdx + 1].Time)
+                    {
+                        lifeFrameIdx++;
+                    }
+                    lifeFrame = lifeFrames[lifeFrameIdx];
+
+                    HitObject nextHitObject = objects.Count > 0 ? objects[0] : new HitObject();
+
+                    osuFrames[i] = new OsuFrame(frame, objects, lifeFrame, nextHitObject, beforeFirstHitObject);
+                    i++;
+                }
+
+                List<OsuFrame> debugFrames = new List<OsuFrame>();
+                foreach ( OsuFrame frame in osuFrames )
+                {
+                    if (!frame.IsBeforeFirstHitObject && frame.ReplayFrame.StandardKeys != 0 && frame.HitObjects.Count > 0)
+                    {
+                        /*
+                        Debug.WriteLine($"Time: {frame.ReplayFrame.Time}\n" +
+                                        $"Cursor pos.: {frame.ReplayFrame.X}, {frame.ReplayFrame.Y}\n" +
+                                        $"Keys: {frame.ReplayFrame.StandardKeys}\n" +
+                                        $"List of hit objects: {frame.HitObjects.Count}\n" +
+                                        $"Next hit object: {frame.NextHitObject.Position}\n" +
+                                        $"LifeFrame: {frame.LifeFrame.Time}, {frame.LifeFrame.Percentage}\n" +
+                                        $"isBeforeFirstHitObject: {frame.IsBeforeFirstHitObject}\n");
+                        */
+                        debugFrames.Add(frame);
+                    }
+                }
+                return;
+            }
+            else
+            {
+                // didnt pick anything
+                return;
+            }
+        }
+
+        private int calculatePreempt(float ar)
+        {
+            if (ar < 5)
+            {
+                return 1200 + (int)(600 * (5 - ar) / 5);
+            }
+            else
+            {
+                return 1200 + (int)(750 * (ar - 5) / 5);
             }
         }
 
