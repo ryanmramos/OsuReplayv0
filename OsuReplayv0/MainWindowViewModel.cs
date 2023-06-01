@@ -17,6 +17,7 @@ using System.Windows;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Collections.Generic;
+using System.IO;
 
 namespace OsuReplayv0
 {
@@ -63,7 +64,8 @@ namespace OsuReplayv0
         private void OnOsuClick()
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
-            fileDialog.InitialDirectory = "C:\\Users\\ryanr\\AppData\\Local\\osu!\\Songs";
+            string songsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "osu!", "Songs");
+            fileDialog.InitialDirectory = songsFolderPath;
             fileDialog.Filter = ".osu files | *.osu";
 
             bool? success = fileDialog.ShowDialog();
@@ -183,7 +185,8 @@ namespace OsuReplayv0
             }
 
             OpenFileDialog fileDialog = new OpenFileDialog();
-            fileDialog.InitialDirectory = "C:\\Users\\ryanr\\AppData\\Local\\osu!\\Replays";
+            string replaysFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "osu!", "Replays");
+            fileDialog.InitialDirectory = replaysFolderPath;
             fileDialog.Filter = ".osr files| *.osr";
 
             bool? success = fileDialog.ShowDialog();
