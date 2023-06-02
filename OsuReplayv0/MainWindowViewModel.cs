@@ -13,11 +13,11 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Input;
-using System.Windows;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
 
 namespace OsuReplayv0
 {
@@ -78,11 +78,10 @@ namespace OsuReplayv0
 
                 Debug.WriteLine($"Path: {path}\nFile name: {fileName}");
 
-                /*
                 // IMAGE
                 SrcImage = path.Substring(0, path.LastIndexOf('\\')) + "\\" + beatmap.EventsSection.BackgroundImage;
 
-
+                /*
                 // AUDIO
                 // TODO: need to increase scope of mediaplayer later (problem of one or more songs at same time)
                 MediaPlayer player = new MediaPlayer();
@@ -178,12 +177,14 @@ namespace OsuReplayv0
                 return;
             }
 
+            // Check that selected beatmap is in standard mode
             if (beatmap.GeneralSection.ModeId != 0)
             {
                 Debug.WriteLine("Beatmap must be in osu!standard");
                 return;
             }
 
+            // Prompt user with file dialog to select a replay file
             OpenFileDialog fileDialog = new OpenFileDialog();
             string replaysFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "osu!", "Replays");
             fileDialog.InitialDirectory = replaysFolderPath;
@@ -197,25 +198,74 @@ namespace OsuReplayv0
 
                 Debug.WriteLine($"Path: {path}\nFile name: {fileName}");
 
+                // Parse replay data
                 Replay replay = ReplayDecoder.Decode(path);
 
                 replayFrames = replay.ReplayFrames.ToArray();
                 osuFrames = new OsuFrame[replayFrames.Length];
 
                 HitObject[] hitObjects = beatmap.HitObjects.ToArray();
+                int nextHitObjectIdx = 0;
                 LifeFrame[] lifeFrames = replay.LifeFrames.ToArray();
-                float AR = beatmap.DifficultySection.ApproachRate;
 
+                // Approach rate of the beatmap
+                float AR = beatmap.DifficultySection.ApproachRate;
+                // Overall difficulty of the beatmap
+                float OD = beatmap.DifficultySection.OverallDifficulty;
+                // Circle size of the beatmap
+                float CS = beatmap.DifficultySection.CircleSize;
+
+                // How much time in ms the hit object begins to fade in before its hit time
                 int preempt = calculatePreempt(AR);
 
                 int lifeFrameIdx = 0;
                 int windowStartIdx = 0;
+                StandardKeys currKeys = StandardKeys.None;
 
                 bool beforeFirstHitObject = true;
+
+                List<HitObjectTap> objectsTapped = new List<HitObjectTap>();
 
                 int i = 0;
                 foreach ( ReplayFrame frame in replayFrames )
                 {
+
+                    /**
+                     * Check if there are any hit objects preempt ms ahead
+                     *  - Check if the cursor is within the next hit object
+                     *      - Check if a valid tap is made
+                     *          - Add to hitobjecttap list
+                     */
+
+                    HitObject nextHitObject = hitObjects[nextHitObjectIdx];
+                    StandardKeys prevKeys = currKeys;
+                    currKeys = frame.StandardKeys;
+
+                    // Check if next hit object needs to be checked
+                    int maxDelay = (200 - (int)(10 * OD)) / 2;
+                    if (frame.Time >= nextHitObject.StartTime - preempt && frame.Time <= nextHitObject.StartTime + maxDelay)
+                    {
+                        // Check if the cursor is within the next hit object
+                        if (isCursorWithinHitObject(frame.X, frame.Y, nextHitObject.Position, CS))
+                        {
+                            // Check if a valid tap is made
+                            // TODO: this check for a valid tap needs to be made more rigorous later
+                            if (currKeys != prevKeys && currKeys < StandardKeys.Smoke && currKeys > StandardKeys.None)
+                            {
+                                objectsTapped.Add(new HitObjectTap(nextHitObject,
+                                                  new Vector2(frame.X, frame.Y), currKeys,
+                                                  frame.Time - nextHitObject.StartTime, true));
+                                nextHitObjectIdx++;
+                            }
+                        }
+                    }
+                    else if (frame.Time > nextHitObject.StartTime + maxDelay)
+                    {
+                        objectsTapped.Add(new HitObjectTap(nextHitObject, false));
+                        nextHitObjectIdx++;
+                    }
+
+                    /*
                     if (beforeFirstHitObject)
                     {
                         if (frame.Time >= hitObjects[0].StartTime)
@@ -247,32 +297,29 @@ namespace OsuReplayv0
 
                     osuFrames[i] = new OsuFrame(frame, objects, lifeFrame, nextHitObject, beforeFirstHitObject);
                     i++;
+                    */
                 }
 
-                List<OsuFrame> debugFrames = new List<OsuFrame>();
-                foreach ( OsuFrame frame in osuFrames )
+                foreach ( HitObjectTap objTap in objectsTapped )
                 {
-                    if (!frame.IsBeforeFirstHitObject && frame.ReplayFrame.StandardKeys != 0 && frame.HitObjects.Count > 0)
-                    {
-                        /*
-                        Debug.WriteLine($"Time: {frame.ReplayFrame.Time}\n" +
-                                        $"Cursor pos.: {frame.ReplayFrame.X}, {frame.ReplayFrame.Y}\n" +
-                                        $"Keys: {frame.ReplayFrame.StandardKeys}\n" +
-                                        $"List of hit objects: {frame.HitObjects.Count}\n" +
-                                        $"Next hit object: {frame.NextHitObject.Position}\n" +
-                                        $"LifeFrame: {frame.LifeFrame.Time}, {frame.LifeFrame.Percentage}\n" +
-                                        $"isBeforeFirstHitObject: {frame.IsBeforeFirstHitObject}\n");
-                        */
-                        debugFrames.Add(frame);
-                    }
+                    continue;
                 }
-                return;
             }
             else
             {
                 // didnt pick anything
                 return;
             }
+        }
+
+        private bool isCursorWithinHitObject(float cursorX, float cursorY, Vector2 objectPosition, float cs)
+        {
+            float termX = (cursorX - objectPosition.X) * (cursorX - objectPosition.X);
+            float termY = (cursorY - objectPosition.Y) * (cursorY - objectPosition.Y);
+            double dist = Math.Sqrt(termX + termY);
+
+            // TODO: maybe abstract some of this out such as determining circle size in osu!pix
+            return dist <= (54.4 - 4.48 * cs);
         }
 
         private int calculatePreempt(float ar)
