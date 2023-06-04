@@ -237,6 +237,13 @@ namespace OsuReplayv0
                      *          - Add to hitobjecttap list
                      */
 
+                    
+                    if (nextHitObjectIdx >= hitObjects.Length)
+                    {
+                        break;
+                    }
+                    
+
                     HitObject nextHitObject = hitObjects[nextHitObjectIdx];
                     StandardKeys prevKeys = currKeys;
                     currKeys = frame.StandardKeys;
@@ -245,12 +252,21 @@ namespace OsuReplayv0
                     int maxDelay = (200 - (int)(10 * OD)) / 2;
                     if (frame.Time >= nextHitObject.StartTime - preempt && frame.Time <= nextHitObject.StartTime + maxDelay)
                     {
+                        // Check if Spinner
+                        if (nextHitObject is Spinner && currKeys > StandardKeys.None && currKeys > StandardKeys.M2 && currKeys != StandardKeys.Smoke)
+                        {
+                            objectsTapped.Add(new HitObjectTap(nextHitObject,
+                                              new Vector2(frame.X, frame.Y), currKeys,
+                                              frame.Time - nextHitObject.StartTime, true));
+                            nextHitObjectIdx++;
+                            continue;
+                        }
                         // Check if the cursor is within the next hit object
                         if (isCursorWithinHitObject(frame.X, frame.Y, nextHitObject.Position, CS))
                         {
                             // Check if a valid tap is made
                             // TODO: this check for a valid tap needs to be made more rigorous later
-                            if (currKeys != prevKeys && currKeys < StandardKeys.Smoke && currKeys > StandardKeys.None)
+                            if (currKeys != prevKeys && currKeys != StandardKeys.Smoke && currKeys > StandardKeys.M2)
                             {
                                 objectsTapped.Add(new HitObjectTap(nextHitObject,
                                                   new Vector2(frame.X, frame.Y), currKeys,
