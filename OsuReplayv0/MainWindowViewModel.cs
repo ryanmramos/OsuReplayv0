@@ -41,6 +41,9 @@ namespace OsuReplayv0
         private double cursorTop;
 
         [ObservableProperty]
+        private SolidColorBrush cursorFill = Brushes.Black;
+
+        [ObservableProperty]
         private SolidColorBrush rec1Fill = Brushes.White;
 
         [ObservableProperty]
@@ -49,17 +52,37 @@ namespace OsuReplayv0
         [ObservableProperty]
         private string srcImage;
 
+        [ObservableProperty]
+        private double hitCircleRadius;
+
+        [ObservableProperty]
+        private double hitCircleLeft;
+
+        [ObservableProperty]
+        private double hitCircleTop;
+
         public ObservableCollection<Circle> Circles { get; } = new ObservableCollection<Circle>();
+
+        private int currObjTapIdx = 0;
+
+        private List<HitObjectTap> objectsTapped = new List<HitObjectTap>();
+
 
         public MainWindowViewModel()
         {
             OsrClickCommand = new RelayCommand(OnOsrClick);
             OsuClickCommand = new RelayCommand(OnOsuClick);
+            NextHitObjectCommand = new RelayCommand(OnNextHitObjectClick);
+            BackHitObjectCommand = new RelayCommand(OnBackHitObjectClick);
         }
 
         public ICommand OsrClickCommand { get; }
 
         public ICommand OsuClickCommand { get; }
+
+        public ICommand NextHitObjectCommand { get; }
+
+        public ICommand BackHitObjectCommand { get; }
 
         private void OnOsuClick()
         {
@@ -215,6 +238,8 @@ namespace OsuReplayv0
                 // Circle size of the beatmap
                 float CS = beatmap.DifficultySection.CircleSize;
 
+                HitCircleRadius = (54.4 - 4.48 * CS);
+
                 // How much time in ms the hit object begins to fade in before its hit time
                 int preempt = calculatePreempt(AR);
 
@@ -224,7 +249,7 @@ namespace OsuReplayv0
 
                 bool beforeFirstHitObject = true;
 
-                List<HitObjectTap> objectsTapped = new List<HitObjectTap>();
+                objectsTapped = new List<HitObjectTap>();
 
                 int i = 0;
                 foreach ( ReplayFrame frame in replayFrames )
@@ -273,6 +298,13 @@ namespace OsuReplayv0
                                                   frame.Time - nextHitObject.StartTime, true));
                                 nextHitObjectIdx++;
                             }
+                            else if ((replay.Mods & OsuParsers.Enums.Mods.Autoplay) > 0 && nextHitObject.StartTime == frame.Time)
+                            {
+                                objectsTapped.Add(new HitObjectTap(nextHitObject,
+                                                  new Vector2(frame.X, frame.Y), currKeys,
+                                                  frame.Time - nextHitObject.StartTime, true));
+                                nextHitObjectIdx++;
+                            }
                         }
                     }
                     else if (frame.Time > nextHitObject.StartTime + maxDelay)
@@ -314,6 +346,27 @@ namespace OsuReplayv0
                     osuFrames[i] = new OsuFrame(frame, objects, lifeFrame, nextHitObject, beforeFirstHitObject);
                     i++;
                     */
+                }
+
+                // TODO: this is repeated code; move it to method
+                HitObjectTap firstTap = objectsTapped[0];
+                HitCircleLeft = firstTap.HitObject.Position.X;
+                HitCircleTop = firstTap.HitObject.Position.Y;
+
+                CursorLeft = firstTap.CursorPosition.X - firstTap.HitObject.Position.X + HitCircleLeft + HitCircleRadius;
+                CursorTop = firstTap.CursorPosition.Y - firstTap.HitObject.Position.Y + HitCircleTop + HitCircleRadius;
+
+                if (firstTap.HitObject is Slider)
+                {
+                    CursorFill = Brushes.Green;
+                }
+                else if (firstTap.HitObject is Spinner)
+                {
+                    CursorFill = Brushes.Blue;
+                }
+                else
+                {
+                    CursorFill = Brushes.Red;
                 }
 
                 foreach ( HitObjectTap objTap in objectsTapped )
@@ -370,6 +423,61 @@ namespace OsuReplayv0
             else
             {
                 Rec2Fill = Brushes.White;
+            }
+        }
+
+        // TODO: generalize Next and Back ObjectClick (remove repeated code)
+        private void OnNextHitObjectClick()
+        {
+            if (currObjTapIdx + 1 >= objectsTapped.Count)
+            {
+                return;
+            }
+            HitObjectTap objTap = objectsTapped[++currObjTapIdx];
+
+            HitCircleLeft = objTap.HitObject.Position.X;
+            HitCircleTop = objTap.HitObject.Position.Y;
+
+            CursorLeft = objTap.CursorPosition.X - objTap.HitObject.Position.X + HitCircleLeft + HitCircleRadius;
+            CursorTop = objTap.CursorPosition.Y - objTap.HitObject.Position.Y + HitCircleTop + HitCircleRadius;
+            if (objTap.HitObject is Slider)
+            {
+                CursorFill = Brushes.Green;
+            }
+            else if (objTap.HitObject is Spinner) 
+            {
+                CursorFill = Brushes.Blue;
+            }
+            else
+            {
+                CursorFill = Brushes.Red;
+            }
+        }
+
+        private void OnBackHitObjectClick()
+        {
+            if (currObjTapIdx == 0)
+            {
+                return;
+            }
+            HitObjectTap objTap = objectsTapped[--currObjTapIdx];
+
+            HitCircleLeft = objTap.HitObject.Position.X;
+            HitCircleTop = objTap.HitObject.Position.Y;
+
+            CursorLeft = objTap.CursorPosition.X - objTap.HitObject.Position.X + HitCircleLeft + HitCircleRadius;
+            CursorTop = objTap.CursorPosition.Y - objTap.HitObject.Position.Y + HitCircleTop + HitCircleRadius;
+            if (objTap.HitObject is Slider)
+            {
+                CursorFill = Brushes.Green;
+            }
+            else if (objTap.HitObject is Spinner)
+            {
+                CursorFill = Brushes.Blue;
+            }
+            else
+            {
+                CursorFill = Brushes.Red;
             }
         }
     }
