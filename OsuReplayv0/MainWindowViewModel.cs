@@ -44,10 +44,7 @@ namespace OsuReplayv0
         private SolidColorBrush cursorFill = Brushes.Black;
 
         [ObservableProperty]
-        private SolidColorBrush rec1Fill = Brushes.White;
-
-        [ObservableProperty]
-        private SolidColorBrush rec2Fill = Brushes.White;
+        private SolidColorBrush hitCircleFill = Brushes.Transparent;
 
         [ObservableProperty]
         private string srcImage;
@@ -171,6 +168,7 @@ namespace OsuReplayv0
                 int nextHitObjectIdx = 0;
                 LifeFrame[] lifeFrames = replay.LifeFrames.ToArray();
 
+                // TODO: mods effect these values, change them
                 // Approach rate of the beatmap
                 float AR = beatmap.DifficultySection.ApproachRate;
                 // Overall difficulty of the beatmap
@@ -215,6 +213,7 @@ namespace OsuReplayv0
 
                     // Check if next hit object needs to be checked
                     int maxDelay = (200 - (int)(10 * OD)) / 2;
+                    // TODO: Check for offset on the replay (actually might accounted for in replay data)
                     if (frame.Time >= nextHitObject.StartTime - preempt && frame.Time <= nextHitObject.StartTime + maxDelay)
                     {
                         // Check if Spinner
@@ -231,6 +230,7 @@ namespace OsuReplayv0
                         {
                             // Check if a valid tap is made
                             // TODO: this check for a valid tap needs to be made more rigorous later
+                            // (streams not quite being registered correctly because of K1 + K2)
                             if (currKeys != prevKeys && currKeys != StandardKeys.Smoke && currKeys > StandardKeys.M2)
                             {
                                 objectsTapped.Add(new HitObjectTap(nextHitObject,
@@ -328,6 +328,39 @@ namespace OsuReplayv0
             else
             {
                 CursorFill = Brushes.Red;
+            }
+
+            // TODO: Slider accuracy behaves different (300 as long as within 50 window. Account for this)
+            DrawHitCircleColor(objectTap.HitError);
+        }
+
+        private void DrawHitCircleColor(int hitError)
+        {
+            float OD = beatmap.DifficultySection.OverallDifficulty;
+            int window300 = (int)Math.Round(80 - 6 * OD);
+            int window100 = (int)Math.Round(140 - 8 * OD);
+            int window50 = (int)Math.Round(200 - 10 * OD);
+
+            if (hitError < 0)
+            {
+                hitError *= -1;
+            }
+            
+            if (hitError < window300)
+            {
+                HitCircleFill = Brushes.Aqua;
+            }
+            else if (hitError < window100)
+            {
+                HitCircleFill = Brushes.LightGreen;
+            }
+            else if (hitError < window50)
+            {
+                HitCircleFill = Brushes.Purple;
+            }
+            else
+            {
+                HitCircleFill = Brushes.Red;
             }
         }
     }
