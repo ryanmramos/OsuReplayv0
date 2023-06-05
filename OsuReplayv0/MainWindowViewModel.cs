@@ -53,7 +53,7 @@ namespace OsuReplayv0
         private string srcImage;
 
         [ObservableProperty]
-        private double hitCircleRadius;
+        private double hitCircleDiameter;
 
         [ObservableProperty]
         private double hitCircleLeft;
@@ -238,7 +238,7 @@ namespace OsuReplayv0
                 // Circle size of the beatmap
                 float CS = beatmap.DifficultySection.CircleSize;
 
-                HitCircleRadius = (54.4 - 4.48 * CS);
+                HitCircleDiameter = (54.4 - 4.48 * CS) * 2;
 
                 // How much time in ms the hit object begins to fade in before its hit time
                 int preempt = calculatePreempt(AR);
@@ -350,11 +350,11 @@ namespace OsuReplayv0
 
                 // TODO: this is repeated code; move it to method
                 HitObjectTap firstTap = objectsTapped[0];
-                HitCircleLeft = firstTap.HitObject.Position.X;
-                HitCircleTop = firstTap.HitObject.Position.Y;
+                HitCircleLeft = firstTap.HitObject.Position.X - HitCircleDiameter / 2;
+                HitCircleTop = firstTap.HitObject.Position.Y - HitCircleDiameter / 2;
 
-                CursorLeft = firstTap.CursorPosition.X - firstTap.HitObject.Position.X + HitCircleLeft + HitCircleRadius;
-                CursorTop = firstTap.CursorPosition.Y - firstTap.HitObject.Position.Y + HitCircleTop + HitCircleRadius;
+                CursorLeft = firstTap.CursorPosition.X - firstTap.HitObject.Position.X + HitCircleLeft + HitCircleDiameter / 2 - 4;
+                CursorTop = firstTap.CursorPosition.Y - firstTap.HitObject.Position.Y + HitCircleTop + HitCircleDiameter / 2 - 4;
 
                 if (firstTap.HitObject is Slider)
                 {
@@ -435,11 +435,11 @@ namespace OsuReplayv0
             }
             HitObjectTap objTap = objectsTapped[++currObjTapIdx];
 
-            HitCircleLeft = objTap.HitObject.Position.X;
-            HitCircleTop = objTap.HitObject.Position.Y;
+            HitCircleLeft = objTap.HitObject.Position.X - HitCircleDiameter / 2;
+            HitCircleTop = objTap.HitObject.Position.Y - HitCircleDiameter / 2;
 
-            CursorLeft = objTap.CursorPosition.X - objTap.HitObject.Position.X + HitCircleLeft + HitCircleRadius;
-            CursorTop = objTap.CursorPosition.Y - objTap.HitObject.Position.Y + HitCircleTop + HitCircleRadius;
+            CursorLeft = objTap.CursorPosition.X - objTap.HitObject.Position.X + HitCircleLeft + HitCircleDiameter / 2 - 4;
+            CursorTop = objTap.CursorPosition.Y - objTap.HitObject.Position.Y + HitCircleTop + HitCircleDiameter / 2 - 4;
             if (objTap.HitObject is Slider)
             {
                 CursorFill = Brushes.Green;
@@ -462,11 +462,11 @@ namespace OsuReplayv0
             }
             HitObjectTap objTap = objectsTapped[--currObjTapIdx];
 
-            HitCircleLeft = objTap.HitObject.Position.X;
-            HitCircleTop = objTap.HitObject.Position.Y;
+            HitCircleLeft = objTap.HitObject.Position.X - HitCircleDiameter / 2;
+            HitCircleTop = objTap.HitObject.Position.Y - HitCircleDiameter / 2;
 
-            CursorLeft = objTap.CursorPosition.X - objTap.HitObject.Position.X + HitCircleLeft + HitCircleRadius;
-            CursorTop = objTap.CursorPosition.Y - objTap.HitObject.Position.Y + HitCircleTop + HitCircleRadius;
+            CursorLeft = objTap.CursorPosition.X - objTap.HitObject.Position.X + HitCircleLeft + HitCircleDiameter / 2 - 4;
+            CursorTop = objTap.CursorPosition.Y - objTap.HitObject.Position.Y + HitCircleTop + HitCircleDiameter / 2 - 4;
             if (objTap.HitObject is Slider)
             {
                 CursorFill = Brushes.Green;

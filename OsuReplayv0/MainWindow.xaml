@@ -45,7 +45,7 @@
                      Canvas.Left="{Binding CursorLeft}" Canvas.Top="{Binding CursorTop}"/>
                 -->
 
-                <Ellipse x:Name="hitCircle" Width="{Binding HitCircleRadius}" Height="{Binding HitCircleRadius}" Fill="Aqua"
+                <Ellipse x:Name="hitCircle" Width="{Binding HitCircleDiameter}" Height="{Binding HitCircleDiameter}" Fill="Aqua"
                          Canvas.Left="{Binding HitCircleLeft}" Canvas.Top="{Binding HitCircleTop}"/>
 
                 <!-- Dots relative to the circle's center -->
