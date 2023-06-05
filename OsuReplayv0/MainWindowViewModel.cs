@@ -131,68 +131,8 @@ namespace OsuReplayv0
             }
         }
 
-        private async void DrawHitObject(HitObject hitObject)
-        {
-            if (hitObject.GetType() != typeof(HitCircle))
-            {
-                return;
-            }
-            Circle circle = new Circle { X = hitObject.Position.X, Y = hitObject.Position.Y, Radius = 30, Fill = Brushes.Aqua };
-            var uiContext = SynchronizationContext.Current;
-            Circles.Add(circle);
-            await Task.Delay(1000);
-            Circles.Remove(circle);
-        }
-
         private void OnOsrClick()
         {
-            /*
-            OpenFileDialog fileDialog = new OpenFileDialog();
-            fileDialog.Filter = ".osr files| *.osr";
-
-            bool? success = fileDialog.ShowDialog();
-            if (success == true)
-            {
-                string path = fileDialog.FileName;
-                string fileName = fileDialog.SafeFileName;
-
-                Debug.WriteLine($"Path: {path}\nFile name: {fileName}");
-
-                Replay replay = ReplayDecoder.Decode(path);
-
-                Debug.WriteLine(replay.PlayerName);
-
-                replayFrames = replay.ReplayFrames.ToArray();
-            }
-            else
-            {
-                // didnt pick anything
-                return;
-            }
-            Debug.WriteLine(replayFrames.Length);
-
-            ReplayFrame currentFrame = replayFrames[0];
-
-            for (int i = 1; i < replayFrames.Length; i++)
-            {
-                ReplayFrame prevFrame = replayFrames[i - 1];
-                Time = prevFrame.Time;
-                Draw(prevFrame.X, prevFrame.Y, prevFrame.StandardKeys);
-
-                currentFrame = replayFrames[i];
-
-                if (currentFrame.TimeDiff < 0)
-                {
-                    await Task.Delay(-1 * currentFrame.TimeDiff);
-                }
-                else
-                {
-                    //await Task.Delay(1 * currentFrame.TimeDiff);
-                    await Task.Delay((int)(1 * currentFrame.TimeDiff));
-                }
-            }
-            */
-
             // TODO: make to automatically disabled later (CanExecute)
             if  (beatmap == null)
             {
@@ -312,62 +252,9 @@ namespace OsuReplayv0
                         objectsTapped.Add(new HitObjectTap(nextHitObject, false));
                         nextHitObjectIdx++;
                     }
-
-                    /*
-                    if (beforeFirstHitObject)
-                    {
-                        if (frame.Time >= hitObjects[0].StartTime)
-                            beforeFirstHitObject = false;
-                    }
-
-                    List<HitObject> objects = new List<HitObject>();
-                    int windowStart = frame.Time - preempt;
-                    int windowEnd = frame.Time + (200 - (int) (10 * beatmap.DifficultySection.OverallDifficulty)); // TODO: technically window end is when this object is clicked (which may be slightly after), if it ever is. Come back and fix
-                    while ( windowStartIdx < hitObjects.Length && windowStart > hitObjects[windowStartIdx].StartTime) 
-                    {
-                        windowStartIdx++;
-                    }
-                    int localIdx = windowStartIdx;
-                    while ( localIdx < hitObjects.Length && hitObjects[localIdx].StartTime < windowEnd)
-                    {
-                        objects.Add(hitObjects[localIdx]);
-                        localIdx++;
-                    }
-
-                    LifeFrame lifeFrame = new LifeFrame();
-                    while (lifeFrameIdx + 1 < lifeFrames.Length && frame.Time >= lifeFrames[lifeFrameIdx + 1].Time)
-                    {
-                        lifeFrameIdx++;
-                    }
-                    lifeFrame = lifeFrames[lifeFrameIdx];
-
-                    HitObject nextHitObject = objects.Count > 0 ? objects[0] : new HitObject();
-
-                    osuFrames[i] = new OsuFrame(frame, objects, lifeFrame, nextHitObject, beforeFirstHitObject);
-                    i++;
-                    */
                 }
 
-                // TODO: this is repeated code; move it to method
-                HitObjectTap firstTap = objectsTapped[0];
-                HitCircleLeft = firstTap.HitObject.Position.X - HitCircleDiameter / 2;
-                HitCircleTop = firstTap.HitObject.Position.Y - HitCircleDiameter / 2;
-
-                CursorLeft = firstTap.CursorPosition.X - firstTap.HitObject.Position.X + HitCircleLeft + HitCircleDiameter / 2 - 4;
-                CursorTop = firstTap.CursorPosition.Y - firstTap.HitObject.Position.Y + HitCircleTop + HitCircleDiameter / 2 - 4;
-
-                if (firstTap.HitObject is Slider)
-                {
-                    CursorFill = Brushes.Green;
-                }
-                else if (firstTap.HitObject is Spinner)
-                {
-                    CursorFill = Brushes.Blue;
-                }
-                else
-                {
-                    CursorFill = Brushes.Red;
-                }
+                DrawHitObjectTap(objectsTapped[0]);
 
                 foreach ( HitObjectTap objTap in objectsTapped )
                 {
@@ -403,29 +290,6 @@ namespace OsuReplayv0
             }
         }
 
-        private void Draw(double x, double y, StandardKeys sKeys)
-        {
-            CursorLeft = x; CursorTop = y;
-
-            // TODO: check for combination of button presses
-            if (sKeys == StandardKeys.K1)
-            {
-                Rec1Fill = Brushes.Gray;
-            }
-            else
-            {
-                Rec1Fill = Brushes.White;
-            }
-            if (sKeys == StandardKeys.K2)
-            {
-                Rec2Fill = Brushes.Gray;
-            }
-            else
-            {
-                Rec2Fill = Brushes.White;
-            }
-        }
-
         // TODO: generalize Next and Back ObjectClick (remove repeated code)
         private void OnNextHitObjectClick()
         {
@@ -433,25 +297,7 @@ namespace OsuReplayv0
             {
                 return;
             }
-            HitObjectTap objTap = objectsTapped[++currObjTapIdx];
-
-            HitCircleLeft = objTap.HitObject.Position.X - HitCircleDiameter / 2;
-            HitCircleTop = objTap.HitObject.Position.Y - HitCircleDiameter / 2;
-
-            CursorLeft = objTap.CursorPosition.X - objTap.HitObject.Position.X + HitCircleLeft + HitCircleDiameter / 2 - 4;
-            CursorTop = objTap.CursorPosition.Y - objTap.HitObject.Position.Y + HitCircleTop + HitCircleDiameter / 2 - 4;
-            if (objTap.HitObject is Slider)
-            {
-                CursorFill = Brushes.Green;
-            }
-            else if (objTap.HitObject is Spinner) 
-            {
-                CursorFill = Brushes.Blue;
-            }
-            else
-            {
-                CursorFill = Brushes.Red;
-            }
+            DrawHitObjectTap(objectsTapped[++currObjTapIdx]);
         }
 
         private void OnBackHitObjectClick()
@@ -460,18 +306,22 @@ namespace OsuReplayv0
             {
                 return;
             }
-            HitObjectTap objTap = objectsTapped[--currObjTapIdx];
+            DrawHitObjectTap(objectsTapped[--currObjTapIdx]);
+        }
 
-            HitCircleLeft = objTap.HitObject.Position.X - HitCircleDiameter / 2;
-            HitCircleTop = objTap.HitObject.Position.Y - HitCircleDiameter / 2;
+        private void DrawHitObjectTap(HitObjectTap objectTap)
+        {
+            HitCircleLeft = objectTap.HitObject.Position.X - HitCircleDiameter / 2;
+            HitCircleTop = objectTap.HitObject.Position.Y - HitCircleDiameter / 2;
 
-            CursorLeft = objTap.CursorPosition.X - objTap.HitObject.Position.X + HitCircleLeft + HitCircleDiameter / 2 - 4;
-            CursorTop = objTap.CursorPosition.Y - objTap.HitObject.Position.Y + HitCircleTop + HitCircleDiameter / 2 - 4;
-            if (objTap.HitObject is Slider)
+            CursorLeft = objectTap.CursorPosition.X - objectTap.HitObject.Position.X + HitCircleLeft + HitCircleDiameter / 2 - 4;
+            CursorTop = objectTap.CursorPosition.Y - objectTap.HitObject.Position.Y + HitCircleTop + HitCircleDiameter / 2 - 4;
+
+            if (objectTap.HitObject is Slider)
             {
                 CursorFill = Brushes.Green;
             }
-            else if (objTap.HitObject is Spinner)
+            else if (objectTap.HitObject is Spinner)
             {
                 CursorFill = Brushes.Blue;
             }
