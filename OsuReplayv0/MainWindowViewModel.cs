@@ -10,11 +10,9 @@ using OsuParsers.Replays.Objects;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Collections.ObjectModel;
-using System.Threading;
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
@@ -213,7 +211,7 @@ namespace OsuReplayv0
 
                     // Check if next hit object needs to be checked
                     int maxDelay = (200 - (int)(10 * OD)) / 2;
-                    // TODO: Check for offset on the replay (actually might accounted for in replay data)
+                    // TODO: Check for offset on the replay (actually might be accounted for in replay data)
                     if (frame.Time >= nextHitObject.StartTime - preempt && frame.Time <= nextHitObject.StartTime + maxDelay)
                     {
                         // Check if Spinner
@@ -229,9 +227,9 @@ namespace OsuReplayv0
                         if (isCursorWithinHitObject(frame.X, frame.Y, nextHitObject.Position, CS))
                         {
                             // Check if a valid tap is made
-                            // TODO: this check for a valid tap needs to be made more rigorous later
+                            // TODO: this check for a valid tap needs to be made more rigorous later (use queue)
                             // (streams not quite being registered correctly because of K1 + K2)
-                            if (currKeys != prevKeys && currKeys != StandardKeys.Smoke && currKeys > StandardKeys.M2)
+                            if (isValidTap(prevKeys, currKeys))
                             {
                                 objectsTapped.Add(new HitObjectTap(nextHitObject,
                                                   new Vector2(frame.X, frame.Y), currKeys,
@@ -268,6 +266,22 @@ namespace OsuReplayv0
             }
         }
 
+        // Checks to see if a valid tap was made based on the previous and current set of keys pressed
+        // TODO: This will, for now, ignore mouse button inputs (M1 and M2). Figure out a way to account for mouse buttons also later
+        // Problem arises from the fact that mouse button inputs are still logged when they are disabled (can this toggle be read from replay md5?)
+        private bool isValidTap(StandardKeys prevKeys, StandardKeys currKeys)
+        {
+
+            if (currKeys != prevKeys && currKeys != StandardKeys.Smoke && currKeys > StandardKeys.M2)
+            {
+                // TODO: add valid tap checks here
+                return true;
+            }
+
+            return false;
+        }
+
+        // Checks to see whether the cursor is within a given object
         private bool isCursorWithinHitObject(float cursorX, float cursorY, Vector2 objectPosition, float cs)
         {
             float termX = (cursorX - objectPosition.X) * (cursorX - objectPosition.X);
@@ -317,7 +331,7 @@ namespace OsuReplayv0
             CursorLeft = objectTap.CursorPosition.X - objectTap.HitObject.Position.X + HitCircleLeft + HitCircleDiameter / 2 - 4;
             CursorTop = objectTap.CursorPosition.Y - objectTap.HitObject.Position.Y + HitCircleTop + HitCircleDiameter / 2 - 4;
 
-            if (objectTap.HitObject is Slider)
+            if (objectTap.HitObject is OsuParsers.Beatmaps.Objects.Slider)
             {
                 CursorFill = Brushes.Green;
             }
