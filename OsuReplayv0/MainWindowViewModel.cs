@@ -45,6 +45,12 @@ namespace OsuReplayv0
         private SolidColorBrush hitCircleFill = Brushes.Transparent;
 
         [ObservableProperty]
+        private SolidColorBrush rec1Fill = Brushes.White;
+
+        [ObservableProperty]
+        private SolidColorBrush rec2Fill = Brushes.White;
+
+        [ObservableProperty]
         private string srcImage;
 
         [ObservableProperty]
@@ -271,13 +277,33 @@ namespace OsuReplayv0
         // Problem arises from the fact that mouse button inputs are still logged when they are disabled (can this toggle be read from replay md5?)
         private bool isValidTap(StandardKeys prevKeys, StandardKeys currKeys)
         {
-
+            // TODO: might have to reimplement this using a queue later for registering double-tapping
             if (currKeys != prevKeys && currKeys != StandardKeys.Smoke && currKeys > StandardKeys.M2)
             {
-                // TODO: add valid tap checks here
-                return true;
+                // K1 pressed
+                if ((currKeys & StandardKeys.K1) > 0)
+                {
+                    // Check that K1 wasn't also pressed in previous set of pressed keys
+                    if ((currKeys & StandardKeys.K1) != (prevKeys & StandardKeys.K1))
+                    {
+                        // K1 validly pressed here
+                        return true;
+                    }
+                }
+
+                // K2 pressed
+                if ((currKeys & StandardKeys.K2) > 0)
+                {
+                    // Check that K2 wasn't also pressed in previous set of pressed keys
+                    if ((currKeys & StandardKeys.K2) != (prevKeys & StandardKeys.K2))
+                    {
+                        // K2 validly pressed here
+                        return true;
+                    }
+                }
             }
 
+            // Neither K1 nor K2 were validly pressed
             return false;
         }
 
@@ -342,6 +368,23 @@ namespace OsuReplayv0
             else
             {
                 CursorFill = Brushes.Red;
+            }
+
+            if ((objectTap.KeysPressed & StandardKeys.K1) > 0)
+            {
+                Rec1Fill = Brushes.Gray;
+            }
+            else
+            {
+                Rec1Fill= Brushes.White;
+            }
+            if ((objectTap.KeysPressed & StandardKeys.K2) > 0)
+            {
+                Rec2Fill = Brushes.Gray;
+            }
+            else
+            {
+                Rec2Fill= Brushes.White;
             }
 
             // TODO: Slider accuracy behaves different (300 as long as within 50 window. Account for this)

@@ -15,8 +15,9 @@
 
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width=".4*"/>
-                <ColumnDefinition Width=".4*"/>
+                <ColumnDefinition Width=".3*"/>
+                <ColumnDefinition Width=".3*"/>
+                <ColumnDefinition Width=".2*"/>
                 <ColumnDefinition Width=".2*"/>
             </Grid.ColumnDefinitions>
             <Button Name="btnOsu" Content=".osu" Width="100" Height="40"
@@ -25,6 +26,21 @@
                 Command="{Binding OsrClickCommand}"/>
 
             <Grid Grid.Column="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid>
+                    <Rectangle Fill="{Binding Rec1Fill}" Stroke="Black"/>
+                    <TextBlock Text="K1" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Grid>
+                <Grid Grid.Column="1">
+                    <Rectangle Grid.Column="1" Fill="{Binding Rec2Fill}" Stroke="Black"/>
+                    <TextBlock Text="K2" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Grid>
+            </Grid>
+
+            <Grid Grid.Column="3">
                 <Grid.RowDefinitions>
                     <RowDefinition/>
                     <RowDefinition/>
