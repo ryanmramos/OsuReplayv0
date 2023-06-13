@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 
 namespace OsuReplayv0
 {
@@ -7,10 +8,19 @@ namespace OsuReplayv0
     /// </summary>
     public partial class MainWindow : Window
     {
+
+        MainWindowViewModel viewModel = new MainWindowViewModel();
+
         public MainWindow()
         {
-            DataContext = new MainWindowViewModel();
+            DataContext = viewModel;
             InitializeComponent();
+            SizeChanged += MainWindow_SizeChange;
+        }
+
+        private void MainWindow_SizeChange(object sender, SizeChangedEventArgs e)
+        {
+            viewModel.WindowSizeChange(PlayGrid);
         }
     }
 }

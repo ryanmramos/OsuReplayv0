@@ -6,11 +6,12 @@
         xmlns:local="clr-namespace:OsuReplayv0"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:MainWindowViewModel}"
-        Title="MainWindow" Height ="500" Width="540">
+        ResizeMode="CanMinimize"
+        Title="OsuReplayV0" Width="1280" Height="1030">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="70"/>
-            <RowDefinition Height="384"/>
+            <RowDefinition />
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0">
@@ -52,20 +53,29 @@
             </Grid>
         </Grid>
 
-        <Grid Grid.Row="1">
-            <Image Width="512" Height="384" Source="{Binding SrcImage}" Stretch="Fill"/>
-            <Rectangle Fill="#C0000000" Width="512" Height="384"/>
-            <Canvas x:Name="canvas" Width="512" Height="384" Grid.Row="1" Background="Transparent">
-                <!--
-                <Ellipse Width="10" Height="10" Fill="Red" Stroke="Black" StrokeThickness="1"
-                     Canvas.Left="{Binding CursorLeft}" Canvas.Top="{Binding CursorTop}"/>
-                -->
+        <Grid x:Name="PlayGrid" Grid.Row="1"
+              HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
+            <Image Source="{Binding SrcImage}" Stretch="Fill"
+                   Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Grid}}"
+                   Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Grid}}"/>
+            <Rectangle Fill="#C0000000"
+                       Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Grid}}"
+                       Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Grid}}"/>
+
+            <!--Debug rectangle to show the area canvas is covering-->
+            <Rectangle x:Name="DebugRect" Fill="Transparent" Stroke="Aqua" StrokeThickness="2"
+                       Width="{Binding CanvasWidth}" Height="{Binding CanvasHeight}"/>
+            <Canvas x:Name="canvas" Grid.Row="1" Background="Transparent"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Width="{Binding CanvasWidth}"
+                    Height="{Binding CanvasHeight}">
 
                 <Ellipse x:Name="hitCircle" Width="{Binding HitCircleDiameter}" Height="{Binding HitCircleDiameter}" Fill="{Binding HitCircleFill}"
                          Canvas.Left="{Binding HitCircleLeft}" Canvas.Top="{Binding HitCircleTop}"/>
 
                 <!-- Dots relative to the circle's center -->
-                <Ellipse Width="8" Height="8" Fill="{Binding CursorFill}" Canvas.Left="{Binding CursorLeft}" Canvas.Top="{Binding CursorTop}" />
+                <Ellipse Width="8" Height="8" Fill="{Binding CursorFill}"
+                         Canvas.Left="{Binding CursorLeft}" Canvas.Top="{Binding CursorTop}" />
             </Canvas>
         </Grid>
 

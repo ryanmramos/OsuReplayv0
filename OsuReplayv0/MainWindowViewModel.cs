@@ -16,6 +16,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
+using System.Windows.Controls;
 
 namespace OsuReplayv0
 {
@@ -61,6 +62,12 @@ namespace OsuReplayv0
 
         [ObservableProperty]
         private double hitCircleTop;
+
+        [ObservableProperty]
+        private double canvasWidth;
+
+        [ObservableProperty]
+        private double canvasHeight;
 
         public ObservableCollection<Circle> Circles { get; } = new ObservableCollection<Circle>();
 
@@ -135,7 +142,7 @@ namespace OsuReplayv0
         private void OnOsrClick()
         {
             // TODO: make to automatically disabled later (CanExecute)
-            if  (beatmap == null)
+            if (beatmap == null)
             {
                 Debug.WriteLine("Select corresponding beatmap first");
                 return;
@@ -180,7 +187,11 @@ namespace OsuReplayv0
                 // Circle size of the beatmap
                 float CS = beatmap.DifficultySection.CircleSize;
 
-                HitCircleDiameter = (54.4 - 4.48 * CS) * 2;
+                HitCircleDiameter = ((54.4 - 4.48 * CS) * 2);
+
+                // Some algebra here (TODO: double check this, seems wrong)
+                double r_prime = HitCircleDiameter / 2.0 * (-1 + Math.Sqrt((CanvasWidth * CanvasHeight) / (512 * 384)));
+                HitCircleDiameter += 2 * r_prime;
 
                 // How much time in ms the hit object begins to fade in before its hit time
                 int preempt = calculatePreempt(AR);
@@ -194,7 +205,7 @@ namespace OsuReplayv0
                 objectsTapped = new List<HitObjectTap>();
 
                 int i = 0;
-                foreach ( ReplayFrame frame in replayFrames )
+                foreach (ReplayFrame frame in replayFrames)
                 {
 
                     /**
@@ -204,12 +215,12 @@ namespace OsuReplayv0
                      *          - Add to hitobjecttap list
                      */
 
-                    
+
                     if (nextHitObjectIdx >= hitObjects.Length)
                     {
                         break;
                     }
-                    
+
 
                     HitObject nextHitObject = hitObjects[nextHitObjectIdx];
                     StandardKeys prevKeys = currKeys;
@@ -260,7 +271,7 @@ namespace OsuReplayv0
 
                 DrawHitObjectTap(objectsTapped[0]);
 
-                foreach ( HitObjectTap objTap in objectsTapped )
+                foreach (HitObjectTap objTap in objectsTapped)
                 {
                     continue;
                 }
@@ -351,11 +362,19 @@ namespace OsuReplayv0
 
         private void DrawHitObjectTap(HitObjectTap objectTap)
         {
-            HitCircleLeft = objectTap.HitObject.Position.X - HitCircleDiameter / 2;
-            HitCircleTop = objectTap.HitObject.Position.Y - HitCircleDiameter / 2;
+            float CS = beatmap.DifficultySection.CircleSize;
+            double osuPixDiameter = ((54.4 - 4.48 * CS) * 2);
 
-            CursorLeft = objectTap.CursorPosition.X - objectTap.HitObject.Position.X + HitCircleLeft + HitCircleDiameter / 2 - 4;
-            CursorTop = objectTap.CursorPosition.Y - objectTap.HitObject.Position.Y + HitCircleTop + HitCircleDiameter / 2 - 4;
+            HitCircleLeft = objectTap.HitObject.Position.X - osuPixDiameter / 2;
+            HitCircleTop = objectTap.HitObject.Position.Y - osuPixDiameter / 2;
+
+            CursorLeft = objectTap.CursorPosition.X - objectTap.HitObject.Position.X + HitCircleLeft + osuPixDiameter / 2 - 4;
+            CursorTop = objectTap.CursorPosition.Y - objectTap.HitObject.Position.Y + HitCircleTop + osuPixDiameter / 2 - 4;
+
+            HitCircleLeft *= CanvasWidth / 512;
+            HitCircleTop *= CanvasHeight / 384;
+            CursorLeft *= CanvasWidth / 512;
+            CursorTop *= CanvasHeight / 384;
 
             if (objectTap.HitObject is OsuParsers.Beatmaps.Objects.Slider)
             {
@@ -376,7 +395,7 @@ namespace OsuReplayv0
             }
             else
             {
-                Rec1Fill= Brushes.White;
+                Rec1Fill = Brushes.White;
             }
             if ((objectTap.KeysPressed & StandardKeys.K2) > 0)
             {
@@ -384,7 +403,7 @@ namespace OsuReplayv0
             }
             else
             {
-                Rec2Fill= Brushes.White;
+                Rec2Fill = Brushes.White;
             }
 
             // TODO: Slider accuracy behaves different (300 as long as within 50 window. Account for this)
@@ -402,7 +421,7 @@ namespace OsuReplayv0
             {
                 hitError *= -1;
             }
-            
+
             if (hitError < window300)
             {
                 HitCircleFill = Brushes.Aqua;
@@ -419,6 +438,18 @@ namespace OsuReplayv0
             {
                 HitCircleFill = Brushes.Red;
             }
+        }
+
+        // TODO: won't need this, will get rid soon
+        internal void WindowSizeChange(Grid playGrid)
+        {
+            CanvasWidth = playGrid.ActualWidth * .8;
+            CanvasHeight = playGrid.ActualHeight * .8;
+
+            HitCircleLeft *= CanvasWidth / 512;
+            HitCircleTop *= CanvasHeight / 384;
+            CursorLeft *= CanvasWidth / 512;
+            CursorTop *= CanvasHeight / 384;
         }
     }
 }
