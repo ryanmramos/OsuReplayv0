@@ -8,7 +8,6 @@ using OsuParsers.Enums.Replays;
 using OsuParsers.Replays;
 using OsuParsers.Replays.Objects;
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows.Media;
 using System.Windows.Input;
@@ -18,7 +17,7 @@ using System.IO;
 using System.Numerics;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
-using System.Windows;
+using OsuReplayv0.ViewModel;
 
 namespace OsuReplayv0
 {

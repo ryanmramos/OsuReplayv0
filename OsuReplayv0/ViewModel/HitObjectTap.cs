@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Windows.Media;
 
-namespace OsuReplayv0
+namespace OsuReplayv0.ViewModel
 {
     public class HitObjectTap
     {

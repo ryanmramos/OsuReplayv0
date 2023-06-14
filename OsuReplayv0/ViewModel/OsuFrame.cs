@@ -2,7 +2,7 @@
 using OsuParsers.Replays.Objects;
 using System.Collections.Generic;
 
-namespace OsuReplayv0
+namespace OsuReplayv0.ViewModel
 {
     public class OsuFrame
     {
