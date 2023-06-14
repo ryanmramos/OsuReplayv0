@@ -17,6 +17,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using System.Windows.Controls;
+using System.Windows.Media.Imaging;
+using System.Windows;
 
 namespace OsuReplayv0
 {
@@ -28,8 +30,6 @@ namespace OsuReplayv0
 
         private Beatmap beatmap;
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
         [ObservableProperty]
         private int time = 0;
 
@@ -40,7 +40,13 @@ namespace OsuReplayv0
         private double cursorTop;
 
         [ObservableProperty]
-        private SolidColorBrush cursorFill = Brushes.Black;
+        private int cursorDiameter = 80;
+
+        [ObservableProperty]
+        private ImageBrush cursorFill = new ImageBrush(new BitmapImage(new Uri(
+                                                                        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), 
+                                                                        "osu!",
+                                                                        "Skins\\-+ Seoul v9 Personal White Cursor\\cursor.png"))));
 
         [ObservableProperty]
         private SolidColorBrush hitCircleFill = Brushes.Transparent;
@@ -368,25 +374,28 @@ namespace OsuReplayv0
             HitCircleLeft = objectTap.HitObject.Position.X - osuPixDiameter / 2;
             HitCircleTop = objectTap.HitObject.Position.Y - osuPixDiameter / 2;
 
-            CursorLeft = objectTap.CursorPosition.X - objectTap.HitObject.Position.X + HitCircleLeft + osuPixDiameter / 2 - 4;
-            CursorTop = objectTap.CursorPosition.Y - objectTap.HitObject.Position.Y + HitCircleTop + osuPixDiameter / 2 - 4;
+            CursorLeft = objectTap.CursorPosition.X - objectTap.HitObject.Position.X + HitCircleLeft + osuPixDiameter / 2 - CursorDiameter / 2;
+            CursorTop = objectTap.CursorPosition.Y - objectTap.HitObject.Position.Y + HitCircleTop + osuPixDiameter / 2 - CursorDiameter / 2;
 
+            /*
+             * Window resize helper code (not in use)
             HitCircleLeft *= CanvasWidth / 512;
             HitCircleTop *= CanvasHeight / 384;
             CursorLeft *= CanvasWidth / 512;
             CursorTop *= CanvasHeight / 384;
+            */
 
             if (objectTap.HitObject is OsuParsers.Beatmaps.Objects.Slider)
             {
-                CursorFill = Brushes.Green;
+                //CursorFill = Brushes.Green;
             }
             else if (objectTap.HitObject is Spinner)
             {
-                CursorFill = Brushes.Blue;
+                //CursorFill = Brushes.Blue;
             }
             else
             {
-                CursorFill = Brushes.Red;
+                //CursorFill = Brushes.Red;
             }
 
             if ((objectTap.KeysPressed & StandardKeys.K1) > 0)
@@ -424,11 +433,11 @@ namespace OsuReplayv0
 
             if (hitError < window300)
             {
-                HitCircleFill = Brushes.Aqua;
+                HitCircleFill = Brushes.CadetBlue;
             }
             else if (hitError < window100)
             {
-                HitCircleFill = Brushes.LightGreen;
+                HitCircleFill = Brushes.Green;
             }
             else if (hitError < window50)
             {

@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:MainWindowViewModel}"
         ResizeMode="CanMinimize"
-        Title="OsuReplayV0" Width="1280" Height="1030">
+        Title="OsuReplayV0" Width="640" Height="570">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="70"/>
@@ -74,8 +74,10 @@
                          Canvas.Left="{Binding HitCircleLeft}" Canvas.Top="{Binding HitCircleTop}"/>
 
                 <!-- Dots relative to the circle's center -->
-                <Ellipse Width="8" Height="8" Fill="{Binding CursorFill}"
-                         Canvas.Left="{Binding CursorLeft}" Canvas.Top="{Binding CursorTop}" />
+                <Ellipse Width="{Binding CursorDiameter}" Height="{Binding CursorDiameter}"
+                         Fill="{Binding CursorFill}"
+                         Canvas.Left="{Binding CursorLeft}" Canvas.Top="{Binding CursorTop}"
+                         Stretch="Fill"/>
             </Canvas>
         </Grid>
 
