@@ -1,24 +1,29 @@
 ﻿using OsuParsers.Beatmaps.Objects;
-using OsuParsers.Replays.Objects;
+using OsuParsers.Enums.Replays;
 using System.Collections.Generic;
+using System.Numerics;
+using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace OsuReplayv0.ViewModel
 {
     public class OsuFrame
     {
-        public ReplayFrame ReplayFrame { get; set; }
-        public List<HitObject> HitObjects { get; set; }
-        public LifeFrame LifeFrame { get; set; }
-        public HitObject NextHitObject { get; set; }
-        public bool IsBeforeFirstHitObject { get; set; }
 
-        public OsuFrame(ReplayFrame rf, List<HitObject> ho, LifeFrame lf, HitObject nho, bool bfho)
+        public Vector2 CursorPosition { get; }
+        public float Accuracy { get; }
+        public int Score { get; }
+        public StandardKeys KeysPressed { get; }
+        public List<HitObject> HitObjects { get; }
+        public int Time { get; }
+        public float LifePercent { get; }
+        public bool TapRegistered { get; }
+        private static int CursorDiameter { get; set; }
+        private static ImageBrush CursorFill { get; set; }
+
+        public void Draw(ref Canvas canvas)
         {
-            ReplayFrame = rf;
-            HitObjects = ho;
-            LifeFrame = lf;
-            NextHitObject = nho;
-            IsBeforeFirstHitObject = bfho;
+            // TODO: 
         }
 
     }
