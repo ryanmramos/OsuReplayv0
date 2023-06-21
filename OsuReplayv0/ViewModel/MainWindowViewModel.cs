@@ -177,6 +177,9 @@ namespace OsuReplayv0
             // OsuFrame static variables
             OsuFrame.CursorDiameter = 80;
             OsuFrame.CursorFill = CursorFill;
+            OsuFrame.CS = beatmap.DifficultySection.CircleSize;
+            OsuFrame.OD = beatmap.DifficultySection.OverallDifficulty;
+            OsuFrame.AR = beatmap.DifficultySection.ApproachRate;
 
             bool? success = fileDialog.ShowDialog();
             if (success == true)
@@ -205,6 +208,7 @@ namespace OsuReplayv0
                 float CS = beatmap.DifficultySection.CircleSize;
 
                 HitCircleDiameter = ((54.4 - 4.48 * CS) * 2);
+                OsuFrame.HitCircleDiameter = HitCircleDiameter;
 
                 // Some algebra here (TODO: double check this, seems wrong)
                 double r_prime = HitCircleDiameter / 2.0 * (-1 + Math.Sqrt((CanvasWidth * CanvasHeight) / (512 * 384)));
@@ -226,12 +230,15 @@ namespace OsuReplayv0
                     ReplayFrame frame = replayFrames[i];
 
                     // OsuFrame construction setup
+                    StandardKeys prevKeys = currKeys;
+                    currKeys = frame.StandardKeys;
 
                     osuFrames[i] = new OsuFrame
                     {
                         CursorPosition = new Vector2(frame.X, frame.Y),
                         Accuracy = -1f,
                         Score = -1,
+                        KeysPressed = currKeys,
                         HitObjects = new List<HitObject>(),
                         Time = frame.Time,
                         LifePercent = -1f,
@@ -244,8 +251,6 @@ namespace OsuReplayv0
                         continue;
                     }
                     HitObject nextHitObject = hitObjects[nextHitObjectIdx];
-                    StandardKeys prevKeys = currKeys;
-                    currKeys = frame.StandardKeys;
 
                     // Check if next hit object needs to be checked
                     int maxDelay = (200 - (int)(10 * OD)) / 2;
@@ -364,7 +369,26 @@ namespace OsuReplayv0
             {
                 return;
             }
-            osuFrames[++currFrameIdx].Draw();
+            OsuFrame frame = osuFrames[++currFrameIdx];
+            frame.Draw();
+
+            // Mark key presses
+            if ((frame.KeysPressed & StandardKeys.K1) > 0)
+            {
+                Rec1Fill = Brushes.Gray;
+            }
+            else
+            {
+                Rec1Fill = Brushes.White;
+            }
+            if ((frame.KeysPressed & StandardKeys.K2) > 0)
+            {
+                Rec2Fill = Brushes.Gray;
+            }
+            else
+            {
+                Rec2Fill = Brushes.White;
+            }
         }
 
         private void OnBackHitObjectClick()
@@ -373,7 +397,26 @@ namespace OsuReplayv0
             {
                 return;
             }
-            osuFrames[--currFrameIdx].Draw();
+            OsuFrame frame = osuFrames[--currFrameIdx];
+            frame.Draw();
+
+            // Mark key presses
+            if ((frame.KeysPressed & StandardKeys.K1) > 0)
+            {
+                Rec1Fill = Brushes.Gray;
+            }
+            else
+            {
+                Rec1Fill = Brushes.White;
+            }
+            if ((frame.KeysPressed & StandardKeys.K2) > 0)
+            {
+                Rec2Fill = Brushes.Gray;
+            }
+            else
+            {
+                Rec2Fill = Brushes.White;
+            }
         }
 
         private void DrawHitObjectTap(HitObjectTap objectTap)
