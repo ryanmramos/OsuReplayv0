@@ -166,6 +166,10 @@ namespace OsuReplayv0
             fileDialog.InitialDirectory = replaysFolderPath;
             fileDialog.Filter = ".osr files| *.osr";
 
+            // OsuFrame static variables
+            OsuFrame.CursorDiameter = 80;
+            OsuFrame.CursorFill = CursorFill;
+
             bool? success = fileDialog.ShowDialog();
             if (success == true)
             {
@@ -209,72 +213,70 @@ namespace OsuReplayv0
 
                 objectsTapped = new List<HitObjectTap>();
 
-                int i = 0;
-                foreach (ReplayFrame frame in replayFrames)
+                for (int i = 0; i < replayFrames.Length; i++)
                 {
+                    ReplayFrame frame = replayFrames[i];
 
-                    /**
-                     * Check if there are any hit objects preempt ms ahead
-                     *  - Check if the cursor is within the next hit object
-                     *      - Check if a valid tap is made
-                     *          - Add to hitobjecttap list
-                     */
+                    // OsuFrame construction setup
 
+                    osuFrames[i] = new OsuFrame
+                    {
+                        CursorPosition = new Vector2(frame.X, frame.Y),
+                        Accuracy = -1f,
+                        Score = -1,
+                        HitObjects = new List<HitObject>(),
+                        Time = frame.Time,
+                        LifePercent = -1f,
+                        HitObjectTapRegistered = false,
+                    };
 
+                    // Get next relevant hit object
                     if (nextHitObjectIdx >= hitObjects.Length)
                     {
-                        break;
+                        continue;
                     }
-
-
                     HitObject nextHitObject = hitObjects[nextHitObjectIdx];
                     StandardKeys prevKeys = currKeys;
                     currKeys = frame.StandardKeys;
 
                     // Check if next hit object needs to be checked
                     int maxDelay = (200 - (int)(10 * OD)) / 2;
-                    // TODO: Check for offset on the replay (actually might be accounted for in replay data)
                     if (frame.Time >= nextHitObject.StartTime - preempt && frame.Time <= nextHitObject.StartTime + maxDelay)
                     {
+                        osuFrames[i].HitObjects.Add(nextHitObject);
+                        // TODO: get following relevant hit objects, add them to list of HitObjects for OsuFrame
+
                         // Check if Spinner
-                        if (nextHitObject is Spinner && currKeys > StandardKeys.None && currKeys > StandardKeys.M2 && currKeys != StandardKeys.Smoke)
+                        if (nextHitObject is Spinner && currKeys > StandardKeys.M2 && currKeys != StandardKeys.Smoke)
                         {
-                            objectsTapped.Add(new HitObjectTap(nextHitObject,
-                                              new Vector2(frame.X, frame.Y), currKeys,
-                                              frame.Time - nextHitObject.StartTime, true));
-                            nextHitObjectIdx++;
-                            continue;
+                            osuFrames[i].HitObjectTapRegistered = true;
                         }
-                        // Check if the cursor is within the next hit object
-                        if (isCursorWithinHitObject(frame.X, frame.Y, nextHitObject.Position, CS))
+
+                        // Check if cursor is within the next hit object
+                        if (isCursorWithinHitObject(osuFrames[i].CursorPosition, nextHitObject.Position, CS))
                         {
-                            // Check if a valid tap is made
-                            // TODO: this check for a valid tap needs to be made more rigorous later (use queue)
-                            // (streams not quite being registered correctly because of K1 + K2)
+                            // Check if valid tap is made
                             if (isValidTap(prevKeys, currKeys))
                             {
-                                objectsTapped.Add(new HitObjectTap(nextHitObject,
-                                                  new Vector2(frame.X, frame.Y), currKeys,
-                                                  frame.Time - nextHitObject.StartTime, true));
+                                osuFrames[i].HitObjectTapRegistered = true;
                                 nextHitObjectIdx++;
                             }
+                            // Auto mod case
                             else if ((replay.Mods & OsuParsers.Enums.Mods.Autoplay) > 0 && nextHitObject.StartTime == frame.Time)
                             {
-                                objectsTapped.Add(new HitObjectTap(nextHitObject,
-                                                  new Vector2(frame.X, frame.Y), currKeys,
-                                                  frame.Time - nextHitObject.StartTime, true));
+                                osuFrames[i].HitObjectTapRegistered = true;
                                 nextHitObjectIdx++;
                             }
                         }
                     }
                     else if (frame.Time > nextHitObject.StartTime + maxDelay)
                     {
-                        objectsTapped.Add(new HitObjectTap(nextHitObject, false));
                         nextHitObjectIdx++;
                     }
+
                 }
 
-                DrawHitObjectTap(objectsTapped[0]);
+                //DrawHitObjectTap(objectsTapped[0]);
 
                 foreach (HitObjectTap objTap in objectsTapped)
                 {
@@ -324,10 +326,10 @@ namespace OsuReplayv0
         }
 
         // Checks to see whether the cursor is within a given object
-        private bool isCursorWithinHitObject(float cursorX, float cursorY, Vector2 objectPosition, float cs)
+        private bool isCursorWithinHitObject(Vector2 cursorPosition, Vector2 objectPosition, float cs)
         {
-            float termX = (cursorX - objectPosition.X) * (cursorX - objectPosition.X);
-            float termY = (cursorY - objectPosition.Y) * (cursorY - objectPosition.Y);
+            float termX = (cursorPosition.X - objectPosition.X) * (cursorPosition.X - objectPosition.X);
+            float termY = (cursorPosition.Y - objectPosition.Y) * (cursorPosition.Y - objectPosition.Y);
             double dist = Math.Sqrt(termX + termY);
 
             // TODO: maybe abstract some of this out such as determining circle size in osu!pix

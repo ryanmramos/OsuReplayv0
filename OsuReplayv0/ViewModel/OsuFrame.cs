@@ -10,20 +10,20 @@ namespace OsuReplayv0.ViewModel
     public class OsuFrame
     {
 
-        public Vector2 CursorPosition { get; }
-        public float Accuracy { get; }
-        public int Score { get; }
-        public StandardKeys KeysPressed { get; }
-        public List<HitObject> HitObjects { get; }
-        public int Time { get; }
-        public float LifePercent { get; }
-        public bool TapRegistered { get; }
-        private static int CursorDiameter { get; set; }
-        private static ImageBrush CursorFill { get; set; }
+        public Vector2 CursorPosition { get; set; }
+        public float Accuracy { get; set; }
+        public int Score { get; set; }
+        public StandardKeys KeysPressed { get; set; }
+        public List<HitObject> HitObjects { get; set; }
+        public int Time { get; set; }
+        public float LifePercent { get; set; }
+        public bool HitObjectTapRegistered { get; set; }
+        public static int CursorDiameter { get; set; }
+        public static ImageBrush CursorFill { get; set; }
 
         public void Draw(ref Canvas canvas)
         {
-            // TODO: 
+            
         }
 
     }
