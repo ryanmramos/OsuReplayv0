@@ -76,9 +76,11 @@ namespace OsuReplayv0
 
         public ObservableCollection<Circle> Circles { get; } = new ObservableCollection<Circle>();
 
-        private int currObjTapIdx = 0;
+        private int currFrameIdx = 0;
 
         private List<HitObjectTap> objectsTapped = new List<HitObjectTap>();
+
+        private Canvas canvas;
 
 
         public MainWindowViewModel()
@@ -87,6 +89,12 @@ namespace OsuReplayv0
             OsuClickCommand = new RelayCommand(OnOsuClick);
             NextHitObjectCommand = new RelayCommand(OnNextHitObjectClick);
             BackHitObjectCommand = new RelayCommand(OnBackHitObjectClick);
+        }
+
+        internal void SetCanvas(ref Canvas _canvas)
+        {
+            canvas = _canvas;
+            OsuFrame.Canvas = _canvas;
         }
 
         public ICommand OsrClickCommand { get; }
@@ -276,6 +284,7 @@ namespace OsuReplayv0
 
                 }
 
+                osuFrames[0].Draw();
                 //DrawHitObjectTap(objectsTapped[0]);
 
                 foreach (HitObjectTap objTap in objectsTapped)
@@ -351,20 +360,20 @@ namespace OsuReplayv0
         // TODO: generalize Next and Back ObjectClick (remove repeated code)
         private void OnNextHitObjectClick()
         {
-            if (currObjTapIdx + 1 >= objectsTapped.Count)
+            if (currFrameIdx + 1 >= osuFrames.Length)
             {
                 return;
             }
-            DrawHitObjectTap(objectsTapped[++currObjTapIdx]);
+            osuFrames[++currFrameIdx].Draw();
         }
 
         private void OnBackHitObjectClick()
         {
-            if (currObjTapIdx == 0)
+            if (currFrameIdx == 0)
             {
                 return;
             }
-            DrawHitObjectTap(objectsTapped[--currObjTapIdx]);
+            osuFrames[--currFrameIdx].Draw();
         }
 
         private void DrawHitObjectTap(HitObjectTap objectTap)

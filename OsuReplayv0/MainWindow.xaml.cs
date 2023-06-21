@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
 
 namespace OsuReplayv0
 {
@@ -14,6 +15,7 @@ namespace OsuReplayv0
         {
             DataContext = viewModel;
             InitializeComponent();
+            viewModel.SetCanvas(ref canvas);
             SizeChanged += MainWindow_SizeChange;
         }
 

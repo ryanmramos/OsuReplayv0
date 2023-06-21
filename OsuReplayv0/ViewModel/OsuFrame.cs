@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace OsuReplayv0.ViewModel
 {
@@ -20,10 +21,25 @@ namespace OsuReplayv0.ViewModel
         public bool HitObjectTapRegistered { get; set; }
         public static int CursorDiameter { get; set; }
         public static ImageBrush CursorFill { get; set; }
+        public static Canvas Canvas { get; internal set; }
 
-        public void Draw(ref Canvas canvas)
+        public void Draw()
         {
-            
+            // Clear canavs
+            Canvas.Children.Clear();
+
+            // Draw cursor
+            Ellipse cursor = new Ellipse
+            {
+                Width = CursorDiameter, Height = CursorDiameter,
+                Fill = CursorFill,
+                Stretch = Stretch.Fill
+            };
+
+            Canvas.SetLeft(cursor, CursorPosition.X - CursorDiameter / 2);
+            Canvas.SetTop(cursor, CursorPosition.Y - CursorDiameter / 2);
+
+            Canvas.Children.Add(cursor);
         }
 
     }

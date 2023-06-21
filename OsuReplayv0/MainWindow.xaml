@@ -69,15 +69,6 @@
                     HorizontalAlignment="Center" VerticalAlignment="Center"
                     Width="{Binding CanvasWidth}"
                     Height="{Binding CanvasHeight}">
-
-                <Ellipse x:Name="hitCircle" Width="{Binding HitCircleDiameter}" Height="{Binding HitCircleDiameter}" Fill="{Binding HitCircleFill}"
-                         Canvas.Left="{Binding HitCircleLeft}" Canvas.Top="{Binding HitCircleTop}"/>
-
-                <!-- Dots relative to the circle's center -->
-                <Ellipse Width="{Binding CursorDiameter}" Height="{Binding CursorDiameter}"
-                         Fill="{Binding CursorFill}"
-                         Canvas.Left="{Binding CursorLeft}" Canvas.Top="{Binding CursorTop}"
-                         Stretch="Fill"/>
             </Canvas>
         </Grid>
 
