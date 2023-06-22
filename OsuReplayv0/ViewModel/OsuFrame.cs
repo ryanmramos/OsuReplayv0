@@ -41,6 +41,7 @@ namespace OsuReplayv0.ViewModel
             Canvas.Children.Clear();
 
             // Draw HitObjects
+            // TODO: add fading elements
             for (int i = 0; i < HitObjects.Count; i++)
             {
                 HitObject hitObject = HitObjects[i];
@@ -63,7 +64,8 @@ namespace OsuReplayv0.ViewModel
                     {
                         Width = HitCircleDiameter,
                         Height = HitCircleDiameter,
-                        Fill = Brushes.SeaShell
+                        Fill = hitCircleOverlay,
+                        Stroke = Brushes.Aqua, StrokeThickness = 1
                     };
                     Canvas.SetLeft(slider, hitObject.Position.X - HitCircleDiameter / 2);
                     Canvas.SetTop(slider, hitObject.Position.Y - HitCircleDiameter / 2);

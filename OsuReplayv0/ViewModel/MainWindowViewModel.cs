@@ -254,10 +254,24 @@ namespace OsuReplayv0
 
                     // Check if next hit object needs to be checked
                     int maxDelay = (200 - (int)(10 * OD)) / 2;
-                    if (frame.Time >= nextHitObject.StartTime - preempt && frame.Time <= nextHitObject.StartTime + maxDelay)
+                    if (frame.Time >= 0 && frame.Time >= nextHitObject.StartTime - preempt && frame.Time <= nextHitObject.StartTime + maxDelay)
                     {
                         osuFrames[i].HitObjects.Add(nextHitObject);
                         // TODO: get following relevant hit objects, add them to list of HitObjects for OsuFrame
+                        int j = nextHitObjectIdx + 1;
+                        while (j < hitObjects.Length)
+                        {
+                            HitObject hitObject = hitObjects[j];
+                            if (frame.Time >= hitObject.StartTime - preempt && frame.Time <= hitObject.StartTime + maxDelay)
+                            {
+                                osuFrames[i].HitObjects.Add(hitObject);
+                            }
+                            else
+                            {
+                                break;
+                            }
+                            j++;
+                        }
 
                         // Check if Spinner
                         if (nextHitObject is Spinner && currKeys > StandardKeys.M2 && currKeys != StandardKeys.Smoke)
