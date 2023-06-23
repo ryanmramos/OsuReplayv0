@@ -41,7 +41,6 @@ namespace OsuReplayv0.ViewModel
             Canvas.Children.Clear();
 
             // Draw HitObjects
-            // TODO: add fading elements
             for (int i = 0; i < HitObjects.Count; i++)
             {
                 HitObject hitObject = HitObjects[i];
@@ -51,7 +50,8 @@ namespace OsuReplayv0.ViewModel
                     Ellipse hitCircle = new Ellipse
                     {
                         Width = HitCircleDiameter, Height = HitCircleDiameter,
-                        Fill = hitCircleOverlay
+                        Fill = GetSkinElement("hitcircleoverlay.png"),
+                        Opacity = GetHitObjectOpacity(hitObject.StartTime)
                     };
                     Canvas.SetLeft(hitCircle, hitObject.Position.X - HitCircleDiameter / 2);
                     Canvas.SetTop(hitCircle, hitObject.Position.Y - HitCircleDiameter / 2);
@@ -65,7 +65,8 @@ namespace OsuReplayv0.ViewModel
                         Width = HitCircleDiameter,
                         Height = HitCircleDiameter,
                         Fill = hitCircleOverlay,
-                        Stroke = Brushes.Aqua, StrokeThickness = 1
+                        Stroke = Brushes.Aqua, StrokeThickness = 3,
+                        Opacity = GetHitObjectOpacity(hitObject.StartTime)
                     };
                     Canvas.SetLeft(slider, hitObject.Position.X - HitCircleDiameter / 2);
                     Canvas.SetTop(slider, hitObject.Position.Y - HitCircleDiameter / 2);
@@ -100,6 +101,47 @@ namespace OsuReplayv0.ViewModel
             Canvas.SetTop(cursor, CursorPosition.Y - CursorDiameter / 2);
 
             Canvas.Children.Add(cursor);
+        }
+
+        private double GetHitObjectOpacity(int startTime)
+        {
+            int preempt = calculatePreempt(AR);
+            int fadeIn = calculateFadeIn(AR);
+            int deltaDistance = startTime - Time;
+
+            // full opacity condition
+            if (deltaDistance <= preempt - fadeIn)
+            {
+                return 1.00;
+            }
+            else
+            {
+                return (preempt - deltaDistance) / (1.0 * fadeIn);
+            }
+        }
+
+        private int calculatePreempt(float ar)
+        {
+            if (ar < 5)
+            {
+                return 1200 + (int)(600 * (5 - ar) / 5);
+            }
+            else
+            {
+                return 1200 - (int)(750 * (ar - 5) / 5);
+            }
+        }
+
+        private int calculateFadeIn(float ar)
+        {
+            if (ar < 5)
+            {
+                return 800 + (int)(400 * (5 - ar) / 5);
+            }
+            else
+            {
+                return 800 - (int)(500 * (ar - 5) / 5);
+            }
         }
 
         private ImageBrush GetSkinElement(string fileName)
