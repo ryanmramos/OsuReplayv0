@@ -44,34 +44,80 @@ namespace OsuReplayv0.ViewModel
             for (int i = 0; i < HitObjects.Count; i++)
             {
                 HitObject hitObject = HitObjects[i];
+                double opacity = GetHitObjectOpacity(hitObject.StartTime);
+                // TODO: alter this method to use this list of Rectangles
+                //List<Rectangle> rects = new List<Rectangle>();
 
                 if (hitObject is HitCircle)
                 {
-                    Ellipse hitCircle = new Ellipse
+                    Rectangle hitCircle = new Rectangle
                     {
-                        Width = HitCircleDiameter, Height = HitCircleDiameter,
-                        Fill = GetSkinElement("hitcircleoverlay.png"),
-                        Opacity = GetHitObjectOpacity(hitObject.StartTime)
+                        Width = HitCircleDiameter,
+                        Height = HitCircleDiameter,
+                        Fill = GetSkinElement("hitcircle"),
+                        Opacity = opacity
                     };
                     Canvas.SetLeft(hitCircle, hitObject.Position.X - HitCircleDiameter / 2);
                     Canvas.SetTop(hitCircle, hitObject.Position.Y - HitCircleDiameter / 2);
 
+                    Rectangle hitCircleOverlay = new Rectangle
+                    {
+                        Width = HitCircleDiameter, Height = HitCircleDiameter,
+                        Fill = GetSkinElement("hitcircleoverlay"),
+                        Opacity = opacity
+                    };
+                    Canvas.SetLeft(hitCircleOverlay, hitObject.Position.X - HitCircleDiameter / 2);
+                    Canvas.SetTop(hitCircleOverlay, hitObject.Position.Y - HitCircleDiameter / 2);
+
+                    Rectangle number = new Rectangle
+                    {
+                        Width = HitCircleDiameter * .6,
+                        Height = HitCircleDiameter * .6,
+                        Fill = GetSkinElement("default-1"),
+                        Opacity = opacity
+                    };
+                    Canvas.SetLeft(number, hitObject.Position.X - .6 * HitCircleDiameter / 2);
+                    Canvas.SetTop(number, hitObject.Position.Y - .6 * HitCircleDiameter / 2);
+
                     Canvas.Children.Add(hitCircle);
+                    Canvas.Children.Add(hitCircleOverlay);
+                    Canvas.Children.Add(number);
                 }
                 else if (hitObject is OsuParsers.Beatmaps.Objects.Slider)
                 {
-                    Ellipse slider = new Ellipse
+                    Rectangle sliderStartCircle = new Rectangle
                     {
                         Width = HitCircleDiameter,
                         Height = HitCircleDiameter,
-                        Fill = hitCircleOverlay,
-                        Stroke = Brushes.Aqua, StrokeThickness = 3,
-                        Opacity = GetHitObjectOpacity(hitObject.StartTime)
+                        Fill = GetSkinElement("sliderstartcircle"),
+                        Opacity = opacity
                     };
-                    Canvas.SetLeft(slider, hitObject.Position.X - HitCircleDiameter / 2);
-                    Canvas.SetTop(slider, hitObject.Position.Y - HitCircleDiameter / 2);
+                    Canvas.SetLeft(sliderStartCircle, hitObject.Position.X - HitCircleDiameter / 2);
+                    Canvas.SetTop(sliderStartCircle, hitObject.Position.Y - HitCircleDiameter / 2);
 
-                    Canvas.Children.Add(slider);
+                    Rectangle sliderStartCircleOverlay = new Rectangle
+                    {
+                        Width = HitCircleDiameter,
+                        Height = HitCircleDiameter,
+                        Fill = GetSkinElement("sliderstartcircleoverlay"),
+                        Opacity = opacity
+                    };
+                    Canvas.SetLeft(sliderStartCircleOverlay, hitObject.Position.X - HitCircleDiameter / 2);
+                    Canvas.SetTop(sliderStartCircleOverlay, hitObject.Position.Y - HitCircleDiameter / 2);
+
+                    Rectangle number = new Rectangle
+                    {
+                        Width = HitCircleDiameter * .6,
+                        Height = HitCircleDiameter * .6,
+                        Fill = GetSkinElement("default-1"),
+                        Opacity = opacity
+                    };
+                    Canvas.SetLeft(number, hitObject.Position.X - .6 * HitCircleDiameter / 2);
+                    Canvas.SetTop(number, hitObject.Position.Y - .6 * HitCircleDiameter / 2);
+
+                    Canvas.Children.Add(sliderStartCircle);
+                    Canvas.Children.Add(sliderStartCircleOverlay);
+                    Canvas.Children.Add(number);
                 }
                 else
                 {
@@ -90,7 +136,7 @@ namespace OsuReplayv0.ViewModel
             }
 
             // Draw cursor
-            Ellipse cursor = new Ellipse
+            Rectangle cursor = new Rectangle
             {
                 Width = CursorDiameter, Height = CursorDiameter,
                 Fill = CursorFill,
@@ -149,7 +195,7 @@ namespace OsuReplayv0.ViewModel
             return new ImageBrush(new BitmapImage(new Uri(
                                                         System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                                                         "osu!",
-                                                        "Skins\\-+ Seoul v9 Personal White Cursor\\" + fileName))));
+                                                        "Skins\\-+ Seoul v9 Personal White Cursor\\" + fileName + ".png"))));
         }
 
     }
