@@ -372,7 +372,7 @@ namespace OsuReplayv0
             }
             else
             {
-                return 1200 + (int)(750 * (ar - 5) / 5);
+                return 1200 - (int)(750 * (ar - 5) / 5);
             }
         }
 
