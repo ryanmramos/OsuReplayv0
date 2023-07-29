@@ -118,6 +118,29 @@ namespace OsuReplayv0.ViewModel
                     Canvas.Children.Add(sliderStartCircle);
                     Canvas.Children.Add(sliderStartCircleOverlay);
                     Canvas.Children.Add(number);
+
+                    OsuParsers.Beatmaps.Objects.Slider slider = (OsuParsers.Beatmaps.Objects.Slider)hitObject;
+                    // Lines that follow points of slider
+                    Polyline polyline = new Polyline();
+                    polyline.Stroke = Brushes.LightGreen;
+                    polyline.StrokeThickness = 2;
+                    polyline.Opacity = opacity;
+
+                    // LINE
+                    if (slider.CurveType is OsuParsers.Enums.Beatmaps.CurveType.Linear)
+                    {
+                        polyline.Points.Add(new System.Windows.Point(hitObject.Position.X, hitObject.Position.Y));
+                        foreach (Vector2 point in slider.SliderPoints)
+                        {
+                            polyline.Points.Add(new System.Windows.Point(point.X, point.Y));
+                        }
+                    }
+
+                    // TODO: Bezier/CompoundBezier
+
+                    // TODO: Circle
+
+                    Canvas.Children.Add(polyline);
                 }
                 else
                 {
