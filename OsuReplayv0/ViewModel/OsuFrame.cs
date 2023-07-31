@@ -2,6 +2,7 @@
 using OsuParsers.Enums.Replays;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -129,11 +130,53 @@ namespace OsuReplayv0.ViewModel
                     // LINE
                     if (slider.CurveType is OsuParsers.Enums.Beatmaps.CurveType.Linear)
                     {
-                        polyline.Points.Add(new System.Windows.Point(hitObject.Position.X, hitObject.Position.Y));
+                        polyline.Points.Add(new System.Windows.Point(slider.Position.X, slider.Position.Y));
                         foreach (Vector2 point in slider.SliderPoints)
                         {
                             polyline.Points.Add(new System.Windows.Point(point.X, point.Y));
                         }
+
+                        // line 1
+                        Polyline line1 = new Polyline();
+                        line1.Stroke = Brushes.LightBlue;
+                        line1.StrokeThickness = 1;
+                        line1.Opacity = opacity;
+
+                        // line 2
+                        Polyline line2 = new Polyline();
+                        line2.Stroke = Brushes.LightPink; 
+                        line2.StrokeThickness = 1;
+                        line2.Opacity = opacity;
+
+                        // SLOPE
+                        // m = (y_f - y_i) / (x_f - x_i)
+                        double m = (slider.SliderPoints.Last().Y - slider.Position.Y) / (slider.SliderPoints.Last().X - slider.Position.X);
+
+                        // radius of hit circle
+                        double r = HitCircleDiameter / 2;
+
+                        double theta_c = Math.Atan2(slider.SliderPoints.Last().Y - slider.Position.Y, slider.SliderPoints.Last().X - slider.Position.X);
+                        double theta_a = Math.PI / 2 - theta_c;
+
+                        double delta_h = r / Math.Sin(theta_a);
+
+                        if (slider.SliderPoints.Last().X == slider.Position.X)
+                        {
+                            // vertical line
+                        }
+                        else
+                        {
+                            float x_i = slider.Position.X;
+                            float x_f = slider.SliderPoints.Last().X;
+                            line1.Points.Add(new System.Windows.Point(x_i, m * (x_i - slider.Position.X) + slider.Position.Y + delta_h));
+                            line2.Points.Add(new System.Windows.Point(x_i, m * (x_i - slider.Position.X) + slider.Position.Y - delta_h));
+
+                            line1.Points.Add(new System.Windows.Point(x_f, m * (x_f - slider.Position.X) + slider.Position.Y + delta_h));
+                            line2.Points.Add(new System.Windows.Point(x_f, m * (x_f - slider.Position.X) + slider.Position.Y - delta_h));
+                        }
+
+                        Canvas.Children.Add(line1);
+                        Canvas.Children.Add(line2);
                     }
 
                     // TODO: Bezier/CompoundBezier
