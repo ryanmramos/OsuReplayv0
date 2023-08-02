@@ -137,6 +137,21 @@ namespace OsuReplayv0.ViewModel
                     polyline.StrokeThickness = 2;
                     polyline.Opacity = opacity;
 
+                    // line 1
+                    Polyline line1 = new Polyline();
+                    line1.Stroke = Brushes.LightBlue;
+                    line1.StrokeThickness = 1;
+                    line1.Opacity = opacity;
+
+                    // line 2
+                    Polyline line2 = new Polyline();
+                    line2.Stroke = Brushes.LightPink;
+                    line2.StrokeThickness = 1;
+                    line2.Opacity = opacity;
+
+                    // radius of hit circle
+                    double r = HitCircleDiameter / 2;
+
                     // LINE
                     if (slider.CurveType is OsuParsers.Enums.Beatmaps.CurveType.Linear)
                     {
@@ -150,23 +165,8 @@ namespace OsuReplayv0.ViewModel
                         Vector2 final = linePath.lerp(1);
                         polyline.Points.Add(new System.Windows.Point(final.X, final.Y));
 
-                        // line 1
-                        Polyline line1 = new Polyline();
-                        line1.Stroke = Brushes.LightBlue;
-                        line1.StrokeThickness = 1;
-                        line1.Opacity = opacity;
-
-                        // line 2
-                        Polyline line2 = new Polyline();
-                        line2.Stroke = Brushes.LightPink; 
-                        line2.StrokeThickness = 1;
-                        line2.Opacity = opacity;
-
                         Vector2 normalizedNormal = new Vector2(slider.SliderPoints.Last().Y - slider.Position.Y, -1 * (slider.SliderPoints.Last().X - slider.Position.X));
                         normalizedNormal = Vector2.Normalize(normalizedNormal);
-
-                        // radius of hit circle
-                        double r = HitCircleDiameter / 2;
 
                         // TODO: might be convenient to store these initial and final borderline points for when drawing semicirle
                         line1.Points.Add(new System.Windows.Point(initial.X + r * normalizedNormal.X, initial.Y + r * normalizedNormal.Y));
@@ -174,9 +174,6 @@ namespace OsuReplayv0.ViewModel
 
                         line2.Points.Add(new System.Windows.Point(initial.X - r * normalizedNormal.X, initial.Y - r * normalizedNormal.Y));
                         line2.Points.Add(new System.Windows.Point(final.X - r * normalizedNormal.X, final.Y - r * normalizedNormal.Y));
-
-                        Canvas.Children.Add(line1);
-                        Canvas.Children.Add(line2);
                         
                     }
                     else if (slider.CurveType is OsuParsers.Enums.Beatmaps.CurveType.Bezier) // BEZIER/COMPOUNDBEZIER
@@ -185,20 +182,23 @@ namespace OsuReplayv0.ViewModel
                         points.Insert(0, slider.Position);
 
                         CompositeBezierCurve bezCurve = new CompositeBezierCurve(points);
+                        float delta_t = .01f;
+                        Vector2 normalizedNormal;
 
                         // Follow path
-                        for (float t = 0; t <= 1; t += .01f)
+                        for (float t = 0; t <= 1; t += delta_t)
                         {
                             Vector2 pointOnPath = bezCurve.pointAtT(t);
                             polyline.Points.Add(new System.Windows.Point(pointOnPath.X, pointOnPath.Y));
                         }
-
 
                     }
 
                     // TODO: Circle
 
                     Canvas.Children.Add(polyline);
+                    Canvas.Children.Add(line1);
+                    Canvas.Children.Add(line2);
                 }
                 else
                 {
