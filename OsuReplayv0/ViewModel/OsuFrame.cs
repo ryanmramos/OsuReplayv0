@@ -178,8 +178,19 @@ namespace OsuReplayv0.ViewModel
                         Canvas.Children.Add(line2);
                         
                     }
+                    else if (slider.CurveType is OsuParsers.Enums.Beatmaps.CurveType.Bezier) // BEZIER/COMPOUNDBEZIER
+                    {
+                        List<Vector2> points = new List<Vector2>(slider.SliderPoints);
+                        points.Insert(0, slider.Position);
 
-                    // TODO: Bezier/CompoundBezier
+                        CompositeBezierCurve bezCurve = new CompositeBezierCurve(points);
+
+                        // Follow path
+                        Vector2 initial = bezCurve.pointAtT(0);
+                        polyline.Points.Add(new System.Windows.Point(initial.X, initial.Y));
+                        Vector2 final = bezCurve.pointAtT(1);
+                        polyline.Points.Add(new System.Windows.Point(final.X, final.Y));
+                    }
 
                     // TODO: Circle
 

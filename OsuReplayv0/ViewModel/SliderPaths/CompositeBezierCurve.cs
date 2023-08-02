@@ -68,7 +68,8 @@ namespace OsuReplayv0.ViewModel.SliderPaths
                 }
             }
 
-            return Vector2.Zero;
+            // if slight precision error, return ending of last bezier curve segment
+            return BezierCurves.Last().lerp(1);
         }
 
         // "Artificially" perform a recursive linear interpolation for values of t: [0, 1]
