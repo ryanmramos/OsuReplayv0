@@ -161,7 +161,7 @@ namespace OsuReplayv0.ViewModel
                         line2.StrokeThickness = 1;
                         line2.Opacity = opacity;
 
-                        Vector2 normalizedNormal = new Vector2(slider.SliderPoints.Last().X - slider.Position.X, -1 * slider.SliderPoints.Last().Y - slider.Position.Y);
+                        Vector2 normalizedNormal = new Vector2(slider.SliderPoints.Last().Y - slider.Position.Y, -1 * (slider.SliderPoints.Last().X - slider.Position.X));
                         normalizedNormal = Vector2.Normalize(normalizedNormal);
 
                         // radius of hit circle
