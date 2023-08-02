@@ -1,5 +1,6 @@
 ﻿using OsuParsers.Beatmaps.Objects;
 using OsuParsers.Enums.Replays;
+using OsuReplayv0.ViewModel.SliderPaths;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -116,6 +117,14 @@ namespace OsuReplayv0.ViewModel
                     Canvas.SetLeft(number, hitObject.Position.X - .6 * HitCircleDiameter / 2);
                     Canvas.SetTop(number, hitObject.Position.Y - .6 * HitCircleDiameter / 2);
 
+                    Rectangle sliderb = new Rectangle
+                    {
+                        Width = HitCircleDiameter,
+                        Height = HitCircleDiameter,
+                        Fill = GetSkinElement("sliderb"),
+                        Opacity = opacity
+                    };
+
                     Canvas.Children.Add(sliderStartCircle);
                     Canvas.Children.Add(sliderStartCircleOverlay);
                     Canvas.Children.Add(number);
@@ -130,6 +139,17 @@ namespace OsuReplayv0.ViewModel
                     // LINE
                     if (slider.CurveType is OsuParsers.Enums.Beatmaps.CurveType.Linear)
                     {
+
+                        BezierCurve linePath = new BezierCurve(new List<Vector2> { {new Vector2(slider.Position.X, slider.Position.Y)}, 
+                                                                                    { new Vector2(slider.SliderPoints.Last().X, slider.SliderPoints.Last().Y)} });
+
+                        Vector2 initial = linePath.lerp(0);
+                        polyline.Points.Add(new System.Windows.Point(initial.X, initial.Y));
+
+                        Vector2 final = linePath.lerp(1);
+                        polyline.Points.Add(new System.Windows.Point(final.X, final.Y));
+
+                        /*
                         polyline.Points.Add(new System.Windows.Point(slider.Position.X, slider.Position.Y));
                         foreach (Vector2 point in slider.SliderPoints)
                         {
@@ -148,6 +168,7 @@ namespace OsuReplayv0.ViewModel
                         line2.StrokeThickness = 1;
                         line2.Opacity = opacity;
 
+                        
                         // SLOPE
                         // m = (y_f - y_i) / (x_f - x_i)
                         double m = (slider.SliderPoints.Last().Y - slider.Position.Y) / (slider.SliderPoints.Last().X - slider.Position.X);
@@ -175,8 +196,9 @@ namespace OsuReplayv0.ViewModel
                             line2.Points.Add(new System.Windows.Point(x_f, m * (x_f - slider.Position.X) + slider.Position.Y - delta_h));
                         }
 
-                        //Canvas.Children.Add(line1);
-                        //Canvas.Children.Add(line2);
+                        Canvas.Children.Add(line1);
+                        Canvas.Children.Add(line2);
+                        */
                     }
 
                     // TODO: Bezier/CompoundBezier
