@@ -175,8 +175,8 @@ namespace OsuReplayv0.ViewModel
                             line2.Points.Add(new System.Windows.Point(x_f, m * (x_f - slider.Position.X) + slider.Position.Y - delta_h));
                         }
 
-                        Canvas.Children.Add(line1);
-                        Canvas.Children.Add(line2);
+                        //Canvas.Children.Add(line1);
+                        //Canvas.Children.Add(line2);
                     }
 
                     // TODO: Bezier/CompoundBezier
