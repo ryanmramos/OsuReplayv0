@@ -36,6 +36,7 @@ namespace OsuReplayv0.ViewModel
                                                                         "Skins\\-+ Seoul v9 Personal White Cursor\\hitcircleoverlay.png"))));
 
         // TODO: initialize some properties above instead of setting them in MainWindowViewModel
+        // TODO: performance improvements such as not redrawing/recalculating hitobject properties for hitobjects that persist through frames
 
         public void Draw()
         {
@@ -186,10 +187,13 @@ namespace OsuReplayv0.ViewModel
                         CompositeBezierCurve bezCurve = new CompositeBezierCurve(points);
 
                         // Follow path
-                        Vector2 initial = bezCurve.pointAtT(0);
-                        polyline.Points.Add(new System.Windows.Point(initial.X, initial.Y));
-                        Vector2 final = bezCurve.pointAtT(1);
-                        polyline.Points.Add(new System.Windows.Point(final.X, final.Y));
+                        for (float t = 0; t <= 1; t += .01f)
+                        {
+                            Vector2 pointOnPath = bezCurve.pointAtT(t);
+                            polyline.Points.Add(new System.Windows.Point(pointOnPath.X, pointOnPath.Y));
+                        }
+
+
                     }
 
                     // TODO: Circle
