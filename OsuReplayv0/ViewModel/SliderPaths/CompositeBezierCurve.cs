@@ -47,5 +47,14 @@ namespace OsuReplayv0.ViewModel.SliderPaths
 
             return Vector2.Zero;
         }
+
+        // "Artificially" perform a recursive linear interpolation for values of t: [0, 1]
+        public Vector2 pointAtT(float t)
+        {
+            double arclen = arcLen(200);
+            double distTraveled = t * arclen;
+
+            return pointAtDist(distTraveled);
+        }
     }
 }

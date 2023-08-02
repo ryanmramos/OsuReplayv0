@@ -139,22 +139,15 @@ namespace OsuReplayv0.ViewModel
                     // LINE
                     if (slider.CurveType is OsuParsers.Enums.Beatmaps.CurveType.Linear)
                     {
-
+                        // Bezier curve describing slider's path
                         BezierCurve linePath = new BezierCurve(new List<Vector2> { {new Vector2(slider.Position.X, slider.Position.Y)}, 
                                                                                     { new Vector2(slider.SliderPoints.Last().X, slider.SliderPoints.Last().Y)} });
 
+                        // Follow path
                         Vector2 initial = linePath.lerp(0);
                         polyline.Points.Add(new System.Windows.Point(initial.X, initial.Y));
-
                         Vector2 final = linePath.lerp(1);
                         polyline.Points.Add(new System.Windows.Point(final.X, final.Y));
-
-                        /*
-                        polyline.Points.Add(new System.Windows.Point(slider.Position.X, slider.Position.Y));
-                        foreach (Vector2 point in slider.SliderPoints)
-                        {
-                            polyline.Points.Add(new System.Windows.Point(point.X, point.Y));
-                        }
 
                         // line 1
                         Polyline line1 = new Polyline();
@@ -168,37 +161,22 @@ namespace OsuReplayv0.ViewModel
                         line2.StrokeThickness = 1;
                         line2.Opacity = opacity;
 
-                        
-                        // SLOPE
-                        // m = (y_f - y_i) / (x_f - x_i)
-                        double m = (slider.SliderPoints.Last().Y - slider.Position.Y) / (slider.SliderPoints.Last().X - slider.Position.X);
+                        Vector2 normalizedNormal = new Vector2(slider.SliderPoints.Last().X - slider.Position.X, -1 * slider.SliderPoints.Last().Y - slider.Position.Y);
+                        normalizedNormal = Vector2.Normalize(normalizedNormal);
 
                         // radius of hit circle
                         double r = HitCircleDiameter / 2;
 
-                        double theta_c = Math.Atan2(slider.SliderPoints.Last().Y - slider.Position.Y, slider.SliderPoints.Last().X - slider.Position.X);
-                        double theta_a = Math.PI / 2 - theta_c;
+                        // TODO: might be convenient to store these initial and final borderline points for when drawing semicirle
+                        line1.Points.Add(new System.Windows.Point(initial.X + r * normalizedNormal.X, initial.Y + r * normalizedNormal.Y));
+                        line1.Points.Add(new System.Windows.Point(final.X + r * normalizedNormal.X, final.Y + r * normalizedNormal.Y));
 
-                        double delta_h = r / Math.Sin(theta_a);
-
-                        if (slider.SliderPoints.Last().X == slider.Position.X)
-                        {
-                            // vertical line
-                        }
-                        else
-                        {
-                            float x_i = slider.Position.X;
-                            float x_f = slider.SliderPoints.Last().X;
-                            line1.Points.Add(new System.Windows.Point(x_i, m * (x_i - slider.Position.X) + slider.Position.Y + delta_h));
-                            line2.Points.Add(new System.Windows.Point(x_i, m * (x_i - slider.Position.X) + slider.Position.Y - delta_h));
-
-                            line1.Points.Add(new System.Windows.Point(x_f, m * (x_f - slider.Position.X) + slider.Position.Y + delta_h));
-                            line2.Points.Add(new System.Windows.Point(x_f, m * (x_f - slider.Position.X) + slider.Position.Y - delta_h));
-                        }
+                        line2.Points.Add(new System.Windows.Point(initial.X - r * normalizedNormal.X, initial.Y - r * normalizedNormal.Y));
+                        line2.Points.Add(new System.Windows.Point(final.X - r * normalizedNormal.X, final.Y - r * normalizedNormal.Y));
 
                         Canvas.Children.Add(line1);
                         Canvas.Children.Add(line2);
-                        */
+                        
                     }
 
                     // TODO: Bezier/CompoundBezier
