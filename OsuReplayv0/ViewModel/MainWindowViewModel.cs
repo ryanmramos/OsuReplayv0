@@ -320,7 +320,21 @@ namespace OsuReplayv0
                     }
                     else if (frame.Time > nextHitObject.StartTime + maxDelay)
                     {
-                        nextHitObjectIdx++;
+                        // Temporary fix
+                        int j = ++nextHitObjectIdx;
+                        while (j < hitObjects.Length)
+                        {
+                            HitObject hitObject = hitObjects[j];
+                            if (frame.Time >= hitObject.StartTime - preempt && frame.Time <= hitObject.StartTime + maxDelay)
+                            {
+                                osuFrames[i].HitObjects.Add(hitObject);
+                            }
+                            else
+                            {
+                                break;
+                            }
+                            j++;
+                        }
                     }
 
                 }
