@@ -14,6 +14,7 @@ namespace OsuReplayv0.ViewModel
 {
     public class OsuFrame
     {
+        public static Grid PlayGrid { get; set; }
         public static Canvas Canvas { get; internal set; }
         public static int CursorDiameter { get; set; }
         public static ImageBrush CursorFill { get; set; }
@@ -40,7 +41,7 @@ namespace OsuReplayv0.ViewModel
 
         public void Draw()
         {
-            // Clear canavs
+            // Clear & canvas
             Canvas.Children.Clear();
 
             // Draw HitObjects
@@ -183,7 +184,6 @@ namespace OsuReplayv0.ViewModel
 
                         CompositeBezierCurve bezCurve = new CompositeBezierCurve(points);
                         float delta_t = .01f;
-                        Vector2 normalizedNormal;
 
                         // Follow path
                         for (float t = 0; t <= 1; t += delta_t)
@@ -228,6 +228,16 @@ namespace OsuReplayv0.ViewModel
             Canvas.SetTop(cursor, CursorPosition.Y - CursorDiameter / 2);
 
             Canvas.Children.Add(cursor);
+
+            // Modify time
+            for (int i = PlayGrid.Children.Count - 1; i >= 0; i--)
+            {
+                // Caution: this only works when there is one textblock child, might need to change in the future if there are more
+                if (PlayGrid.Children[i] is TextBlock)
+                {
+                    ((TextBlock)(PlayGrid.Children[i])).Text = Time.ToString();
+                }
+            }
         }
 
         private double GetHitObjectOpacity(int startTime)

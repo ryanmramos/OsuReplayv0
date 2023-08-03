@@ -15,7 +15,7 @@ namespace OsuReplayv0
         {
             DataContext = viewModel;
             InitializeComponent();
-            viewModel.SetCanvas(ref canvas);
+            viewModel.SetCanvas(ref canvas, ref PlayGrid);
             SizeChanged += MainWindow_SizeChange;
         }
 

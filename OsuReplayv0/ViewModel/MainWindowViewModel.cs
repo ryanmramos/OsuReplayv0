@@ -82,6 +82,8 @@ namespace OsuReplayv0
 
         private Canvas canvas;
 
+        private Grid playGrid;
+
 
         public MainWindowViewModel()
         {
@@ -91,10 +93,16 @@ namespace OsuReplayv0
             BackHitObjectCommand = new RelayCommand(OnBackHitObjectClick);
         }
 
-        internal void SetCanvas(ref Canvas _canvas)
+        internal void SetCanvas(ref Canvas _canvas, ref Grid _playGrid)
         {
             canvas = _canvas;
+            playGrid = _playGrid;
+
+            // Add outside play area elements
+            playGrid.Children.Add(new TextBlock() { Text = "", Foreground = new SolidColorBrush(Colors.White) });
+
             OsuFrame.Canvas = _canvas;
+            OsuFrame.PlayGrid = _playGrid;
         }
 
         public ICommand OsrClickCommand { get; }
@@ -254,7 +262,8 @@ namespace OsuReplayv0
 
                     // Check if next hit object needs to be checked
                     int maxDelay = (200 - (int)(10 * OD)) / 2;
-                    if (frame.Time >= 0 && frame.Time >= nextHitObject.StartTime - preempt && frame.Time <= nextHitObject.StartTime + maxDelay)
+                    if (frame.Time >= 0 && (frame.Time >= nextHitObject.StartTime - preempt && frame.Time <= nextHitObject.StartTime + maxDelay) || 
+                                            (nextHitObject is OsuParsers.Beatmaps.Objects.Slider && frame.Time <= nextHitObject.EndTime))
                     {
                         osuFrames[i].HitObjects.Add(nextHitObject);
                         // TODO: get following relevant hit objects, add them to list of HitObjects for OsuFrame
@@ -263,9 +272,9 @@ namespace OsuReplayv0
                         {
                             HitObject hitObject = hitObjects[j];
                             if (frame.Time >= hitObject.StartTime - preempt && frame.Time <= hitObject.StartTime + maxDelay)
-                            {
-                                osuFrames[i].HitObjects.Add(hitObject);
-                            }
+                                {
+                                    osuFrames[i].HitObjects.Add(hitObject);
+                                }
                             else
                             {
                                 break;
@@ -282,6 +291,19 @@ namespace OsuReplayv0
                         // Check if cursor is within the next hit object
                         if (isCursorWithinHitObject(osuFrames[i].CursorPosition, nextHitObject.Position, CS))
                         {
+                            // TODO: new conditional statement leads to this needing modifying for sliders
+                            if (nextHitObject is OsuParsers.Beatmaps.Objects.Slider)
+                            {
+                                if (frame.Time <= nextHitObject.EndTime)
+                                {
+                                    continue;
+                                }
+                                else
+                                {
+                                    nextHitObjectIdx++;
+                                }
+                            }
+
                             // Check if valid tap is made
                             if (isValidTap(prevKeys, currKeys))
                             {
@@ -306,7 +328,7 @@ namespace OsuReplayv0
                 osuFrames[0].Draw();
                 //DrawHitObjectTap(objectsTapped[0]);
 
-                foreach (HitObjectTap objTap in objectsTapped)
+                foreach (OsuFrame oFrame in osuFrames)
                 {
                     continue;
                 }
