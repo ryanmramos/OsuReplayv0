@@ -175,6 +175,15 @@ namespace OsuReplayv0.ViewModel
 
                         line2.Points.Add(new System.Windows.Point(initial.X - r * normalizedNormal.X, initial.Y - r * normalizedNormal.Y));
                         line2.Points.Add(new System.Windows.Point(final.X - r * normalizedNormal.X, final.Y - r * normalizedNormal.Y));
+
+                        float t_time = 1.0f * (Time - slider.StartTime) / (slider.EndTime - slider.StartTime);
+                        if (t_time >= 0 && t_time <= 1)
+                        {
+                            Vector2 sliderbPos = linePath.lerp(t_time);
+                            Canvas.SetLeft(sliderb, sliderbPos.X - HitCircleDiameter / 2);
+                            Canvas.SetTop(sliderb, sliderbPos.Y - HitCircleDiameter / 2);
+                            Canvas.Children.Add(sliderb);
+                        }
                         
                     }
                     else if (slider.CurveType is OsuParsers.Enums.Beatmaps.CurveType.Bezier) // BEZIER/COMPOUNDBEZIER
@@ -190,6 +199,15 @@ namespace OsuReplayv0.ViewModel
                         {
                             Vector2 pointOnPath = bezCurve.pointAtT(t);
                             polyline.Points.Add(new System.Windows.Point(pointOnPath.X, pointOnPath.Y));
+                        }
+
+                        float t_time = 1.0f * (Time - slider.StartTime) / (slider.EndTime - slider.StartTime);
+                        if (t_time >= 0 && t_time <= 1)
+                        {
+                            Vector2 sliderbPos = bezCurve.pointAtT(t_time);
+                            Canvas.SetLeft(sliderb, sliderbPos.X - HitCircleDiameter / 2);
+                            Canvas.SetTop(sliderb, sliderbPos.Y - HitCircleDiameter / 2);
+                            Canvas.Children.Add(sliderb);
                         }
 
                     }
