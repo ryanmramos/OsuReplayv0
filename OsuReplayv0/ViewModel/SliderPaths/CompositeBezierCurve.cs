@@ -73,6 +73,7 @@ namespace OsuReplayv0.ViewModel.SliderPaths
         }
 
         // "Artificially" perform a recursive linear interpolation for values of t: [0, 1]
+        // TODO: look into how behavior will change for bezier and compound bezier curves when slider has repeats
         public Vector2 pointAtT(float t)
         {
             double arclen = arcLen(200);
